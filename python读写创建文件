@@ -166,4 +166,10 @@ F.seek(offset[,whence])
 #将文件打操作标记移到offset的位置。这个offset一般是相对于文件的开头来计算的，一般为正数。但如果提供了whence参数就不一定了，whence可以为0表示从头开始计算，1表示以当前位置为原点计算。2表示以文件末尾为原点进行计算。需要注意，如果文件以a或a+的模式打开，每次进行写操作时，文件操作标记会自动返回到文件末尾。
 F.truncate([size])
 #把文件裁成规定的大小，默认的是裁到当前文件操作标记的位置。如果size比文件的大小还要大，依据系统的不同可能是不改变文件，也可能是用0把文件补到相应的大小，也可能是以一些随机的内容加上去。
-http://m.jb51.net/article/92469.htm
+http://m.jb51.net/article/92469.htm     文件读写文件操作
+http://m.jb51.net/article/67475.htm     文件读写方法总结
+http://m.jb51.net/article/47999.htm     文件读写方法操作实例
+http://m.jb51.net/article/78322.htm      Python编程中的文件读写及相关的文件对象方法讲解
+http://m.jb51.net/article/70329.htm      Python实现的Excel文件读写类
+http://m.jb51.net/article/88857.htm       python异常和文件处理机制详解
+http://m.jb51.net/article/62208.htm       python监控网站运行异常并发送邮件的方法
