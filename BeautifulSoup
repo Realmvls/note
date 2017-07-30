@@ -1,0 +1,56 @@
+原创url：http://www.jianshu.com/p/ef2f246cae46
+参考url：http://blog.csdn.net/abclixu123/article/details/38502993
+
+在进入正题前先说一下每次完成代码后，可以用ctrl+alt+l对代码进行自动格式规范化。
+
+在爬取网页中有用的信息时，通常是对存在于网页中的文本或各种不同标签的属性值进行查找，Beautiful Soup中内置了一些查找方式，最常用的是find()和find_all()函数。[文献引自http://blog.csdn.net/abclixu123/article/details/38502993 ]。 同时通过soup.find_all()得到的所有符合条件的结果和soup.select()一样都是列表list，而soup.find()只返回第一个符合条件的结果，所以soup.find()后面可以直接接.text或者get_text()来获得标签中的文本。
+
+一、find()用法
+find(name,attrs,recursive,text,**wargs)
+这些参数相当于过滤器一样可以进行筛选处理，不同的参数过滤可以应用到以下情况：
+查找标签，基于name参数
+查找文本，基于text参数
+基于正则表达式的查找
+查找标签的属性，以及基于attrs参数
+基于函数的查找
+
+<ul id="producers">
+        <li class="producerlist">
+            <div class="name">plants</div>
+            <div class="number">100000</div>
+        </li>
+        <li class="producerlist">
+            <div class="name">algae</div>
+            <div class="number">100000</div>
+        </li>
+</ul>
+以上面的例子来看：
+(1)ul,li,div这些就是标签；
+
+用法p=soup.find('ul') ，那么返回结果是第一个ul标签以及<xx>...</xx>的所有内容，即上面的代码；注意若用p=soup.find('ul').get_text()那么结果不是...的所有内 容，而应该是plants 10000 algae 10000，即...中的标签不算text文本。
+(2)<xx>...</xx>之间的内容就是文本；
+基于文本内容的查找也可以用soup.find()，但必须用到参数text，
+
+用法p=soup.find(text='algae')，print(p)得到的结果就是algae
+(3)正则表达式后面自己另外去学习；
+
+(4)ul id="producers">中的id即标签属性，那么我们可以查找具有特定标签的属性；
+
+用法p=soup.find('ul', id="producers")，那么可以得到<xx>...</xx>的所有结果，其特点是把标签更一步精确化以便于查找。
+对于大多数的情况可以用上面的方法解决，但是有两种情况则要用到参数attrs:一是标签字符中带有-，比如data-custom;二是class不能看作标签属性。解决的办法是在attrs属性用字典进行传递参数：
+soup.find(attrs={'data-custom':'xxx'})以及 soup.find(attrs={'class':'xxx'})
+(5)基于函数的查找也暂时搁置。
+
+二、find_all()用法
+应用到find()中的不同过滤参数同理可以用到find_all()中，相比find()，find_all()有个额外的参数limit，如下所示：
+p=soup.find_all(text='algae',limit=2)
+实际上find()也就是当limit=1时的find_all()。
+
+关于find和find_all的用法先学习这么多，如果后面有涉及到更深入再去研究。
+
+到今天基本把赶集网北京地区的所有内容爬了一遍，但其中涉及到的使用代理ip时还是会报错，等这周日听课时来解决。马上就要用爬取的内容进行统计分析了，所以下一篇会学习非关系型数据库mongodb的知识。
+
+作者：是蓝先生
+链接：http://www.jianshu.com/p/ef2f246cae46
+來源：简书
+著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
