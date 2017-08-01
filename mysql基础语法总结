@@ -28,6 +28,11 @@ mysql 基础总结
  更新user表中id=1的姓名：    update user set name="qianchen" where id=1;    #mysql中单双引号都可以
  将表操作中所有语句保存下来： mysql -uroot -p123 --tee=D:\mysql.log          #在登录时用
 
+ 后期维护t1表字段（列)
+                      1：添加字段：  alter table t1 add age int;                  #(增加age这一列，并定义其int属性)
+                      2:修改字段：   alter table t1 modify age int not null default;
+                      3:删除字段：   alter table t1 drop age;
+                      4修改字段名称：alter table t1 change name username varchar(30);    #修改列名时必须加属性
 
 
 mysql 设计
@@ -43,3 +48,52 @@ mysql 设计
               5：default   默认值   例如用户没有插入数据的时候可以自动填充设置好的默认值
               6：auto_increment   自动累加  例如id自增
                                    primary key  主键索引，比普通索引快，一个表只能有一个主键索引
+
+字符集   （编码问题）
+服务器与数据库与表的字符集一致，为继承关系
+     \s 命令：           查看服务器状态
+     \s的结果显示       server characterset: utf8       服务器字符集
+                        Db characterset :utf8           数据字符集
+                        client characterset : utf8      客户端字符集
+                        conn characterset : utf8        客户端连接字符集
+                        #  字符集不统一会乱码    微软CMD：GBK或GB2312编码     mysql：utf8
+                            修改字符集在  my.ini  文件中
+
+      my.ini中显示     [mysql]
+                       default-character-set=utf8    客户端和连接字符集
+                       [mysql]
+                       character-set-server=utf8       服务器，数据库和表字符集
+                       collation-server =utf8_general_ci   服务器数据库和表校验字符集（排序时确定编码中哪个码在前面）
+
+
+查看数据库字符集：      show database test;
+查看表字符集：          show create table user;
+
+
+表字段索引：1主键索引
+            2普通索引
+
+检测sql语句  既调优，看sql执行效率是否高效  ：desc select * from t1 where id=3\G     #t1为表，当屏幕上一横排显示不下时加\G可更换排列方式显示，\G后面不要留分号
+
+
+创建带索引的表：   create table  t2(
+                  id int unsigned auto_increment,
+                  name varchar(30),
+                  primary key(id),
+                  index in_name(name)             #in_name为新加索引的名字
+                  );
+
+查看t1表中的所有索引：show index from t2；
+mysql帮助方法 ：      ？show
+
+
+后期维护普通索引：
+                    1：往t2表中添加普通索引：alter table t2 add index in_name(name);   #在表的name列中添加一个名为in_name的普通索引
+                    2：删除t2表中普通索引: alter table t2 drop index in _name;
+
+
+SQL语言
+1  DDL   数据定义语言
+2  DML   数据操作语言
+3  DQL   数据查询语言
+4  DCL   数据控制语言
