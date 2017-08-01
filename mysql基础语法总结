@@ -1,0 +1,45 @@
+mysql 基础总结
+开启mysql服务：     net start mysql
+关闭mysql服务：     net stop mysql
+登录mysql：         mysql -uroot -p         #如果设置了密码则在-p后面不空格直接跟密码
+登录时直接定位到test数据库： mysql -uroot -p123 test
+退出数据库：        quit或者exit            #先退出数据库，再关闭mysql服务
+查看都有哪些数据库： show databases；        #mysql中的语句必须加分号结尾
+定位进test数据库里面：use test；
+查看数据库中都有哪些表：show tables；           表分为 表数据 表索引和表结构三部分
+删除user数据库：       drop database user;
+
+创建user表：    create table user(            #id,name,pass 为表字段（表的列头）
+                id int,                         int,varchar 为表属性，可根据需要自己加
+                name varchar,
+                pass varchar
+                );
+
+ 查看user表的表字段或表结构：desc user；
+ 遍历显示user表中所有内容：  select * from user；          #*代表所有字段既所有列
+ 查看user表中所有name的记录：select name from user；
+ 修改表的名字：              rename table user to user1
+ 删除user表：               drop table user；
+ 在user表中插入数据：        insert into user (id,name,pass) values (1,"leiwei","456");
+ user表中新加入sex这一列，用户没有输入时自动填充为nan：  alter table user add sex varchar(5) not null default"nan";
+
+ 查询user表中id=2的表：      select *from user where id=2;
+ 删除user表中id=2的表；      delete *from user where id=2;
+ 更新user表中id=1的姓名：    update user set name="qianchen" where id=1;    #mysql中单双引号都可以
+ 将表操作中所有语句保存下来： mysql -uroot -p123 --tee=D:\mysql.log          #在登录时用
+
+
+
+mysql 设计
+表字段的类型 ： 1 数值  int 整型    float 浮点型            #存日期可全存int类型     一个字节8位
+               2 字符串 char（n） #255，快，占n个字节    varchar（n） #255，节省空间，存多少占多少    text  #65535个字节   longtext  #42亿字节
+               3 日期   data time  date time  year
+
+常用表数据字段属性：
+              1：unsigned  无符号 没有负数
+              2：zerofill  0填充  例如定义一个表结构是int（3），输入数据长度不够3位时左侧补零，但零可以省略所以还是看不见。。。
+              3：null      这一列允许null
+              4：not null  这一列不允许null
+              5：default   默认值   例如用户没有插入数据的时候可以自动填充设置好的默认值
+              6：auto_increment   自动累加  例如id自增
+                                   primary key  主键索引，比普通索引快，一个表只能有一个主键索引
