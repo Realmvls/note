@@ -54,4 +54,81 @@ p=soup.find_all(text='algae',limit=2)
 作者：是蓝先生
 链接：http://www.jianshu.com/p/ef2f246cae46
 來源：简书
-著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
+
+
+
+
+Python之爬取网页时遇到的问题——BeautifulSoup
+     记下两个与本文内容不太相关的知识点。
+
+     import re   对正则表达式支持的包。
+
+     str(soup.p).decode('utf-8')     对标签内容转码。
+
+
+
+     Beautiful Soup 是用Python写的一个HTML/XML的解析器，它可以很好的处理不规范标记并生成剖析树。 它提供简单又常用的导航，搜索以及修改剖析树的操作。它可以大大节省你的编程时间。
+
+
+
+     通俗的来说，就是在
+
+            req = urllib2.Request(url, headers=headers)
+            page = urllib2.urlopen(req, timeout=60)
+            contents = page.read()
+
+    之后，对contents进行解析  soup = BeautifulSoup(contents, 'html.parser')，这样构建的是Python标准库，然后我们便可以对这个soup对象进行一系列的操作，提取我们所需要的元素。
+
+    我们对用法进行一下解释：
+
+    soup.title    得到的是<title>标签，以及标签里的内容。但是得到的是所有<title>标签中的第一个。<title>这里是内容</title>，红字部分。
+
+    soup.title.name    得到的是<title>标签的name属性的值。得到的是所有<title>标签中的第一个。
+
+    soup.title.string    得到的是<title>开始和结束标签之间的值。<title>这里是内容</title>，即红字部分。得到的是所有<title>标签中的第一个。
+
+    soup.find_all('title')     得到所有标签为<title>的的标签，以及标签里的内容。返回的是一个序列，可以对它循环，得到自己想要的东西。
+
+    soup.find(id='3')     得到id为3的标签。
+
+    soup.p.get_text()    返回的是<p>标签的文本。
+
+    soup.a['href']          返回<a>标签的 herf 值 。
+
+    soup.head.contents      获得head下的所有子孩子。以列表的形式返回结果，可以使用 [num]  的形式获得 。获得标签，使用.name 就可以。
+
+    print soup.find_all(text="Elsie")     获得文本为Elsie的标签。
+
+    print soup.find_all("a", limit=2)       返回两个<a>标签。
+
+    string属性，如果超过一个标签的话，那么就会返回None，否则就返回第一个标签的string。超过一个标签的话，可以试用strings。
+
+    获取标签的孩子，可以使用children，但是不能print soup.head.children，没有返回列表，返回的是 <listiterator object at 0x108e6d150>,不过使用list可以将其转化为列表。可以使用for 语句遍历里面的孩子。
+
+     向上查找可以用parent函数，如果查找所有的，那么可以使用parents函数。
+
+     查找下一个兄弟使用next_sibling，查找上一个兄弟节点使用previous_sibling,如果是查找所有的，那么在对应的函数后面加s就可以。
+
+
+
+     soup.select()找到的数据，返回为list类型，即，寻找到的是所有符合要求的数据。
+
+
+
+      soup.select('div')     直接返回所有div标签的所有内容
+
+      soup.select('.ebox')      . 这个点表示查询class="ebox"的，所有标签内容。
+
+      len(soup.select('.ebox'))      可以查询出20条数据。
+
+      soup.select('#index_nav')      查找所有id为 index_nav 的标签。
+
+      soup.select('div #index_nav')    表示寻找div标签中id为index_nav的标签内容。
+
+      soup.select('p[class="etitle"]')     查找所有class为etitle的<p>标签。
+
+
+
+
+
+http://cuiqingcai.com/1319.html    ，    http://blog.csdn.net/akak714/article/details/50130743   这两个网址可以学习一下。
