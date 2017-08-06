@@ -132,3 +132,15 @@ Python之爬取网页时遇到的问题——BeautifulSoup
 
 
 http://cuiqingcai.com/1319.html    ，    http://blog.csdn.net/akak714/article/details/50130743   这两个网址可以学习一下。
+
+几个参考练习网址：http://www.cnblogs.com/cwmizlp/p/7018764.html
+                 http://blog.csdn.net/u011974639/article/details/72869487#使用bs4快速定位标签
+                 https://zhuanlan.zhihu.com/p/21377121
+                 https://yq.aliyun.com/articles/26026
+                 http://www.cocoachina.com/programmer/20150227/11198.html
+                 https://www.zhihu.com/question/48408140
+                 http://blog.csdn.net/u013007900/article/details/54728408
+                 http://www.cnblogs.com/vamei/archive/2013/03/12/2954938.html     #以上都为BautifulSoup查阅网址
+                 http://www.jb51.net/article/92821.htm   #格式化字符串
+                 http://www.jb51.net/article/63672.htm
+                 http://www.jb51.net/article/67161.htm   python踩坑实录
