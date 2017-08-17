@@ -1,0 +1,341 @@
+Python加载csv文件的两种方式
+csv文件中每行数据的每个特征列都是用逗号“，”隔开。CSV文件中除了保存数值外，还有一些属性值，如第一行以及第一列的label标签。所以在处理是需要进行相应的处理。
+
+下面介绍下两种加载这种csv文件的方法
+
+方法一：使用Python的csv模块
+
+csv模块中的函数
+
+reader(csvfile, dialect='excel', **fmtparams)
+参数说明：
+csvfile，必须是支持迭代(Iterator)的对象，可以是文件(file)对象或者列表(list)对象，如果是文件对
+象，打开时需要加”b”标志参数。
+
+dialect，编码风格，默认为excel的风格，也就是用逗号（,）分隔，dialect方式也支持自定义，通过调用register_dialect方法来注册，下文会提到。
+
+fmtparam，格式化参数，用来覆盖之前dialect对象指定的编码风格。
+
+加载文件代码：
+
+import csv
+def loadCSVfile1():
+    list_file = []
+    with open('train.csv','rb') as csv_file:
+        all_lines=cvs.reader(csv_file)
+        for one_line in all_lines:
+            list_file.append(one_line)
+    list_file.remove(list_file[0])
+    arr_file = array(list_file)
+    label = arr_file[:, 0]
+    data = arr_file[:, 1:]
+    return data, label
+
+其中，‘rb’中的r表示“读”模式，因为是文件对象，所以加‘b’。open()返回了一个文件对象
+myFile，reader(myFile)只传入了第一个参数，另外两个参数采用缺省值，即以excel风格读入。reader()返回一个
+reader对象all_lines,all_lines是一个list，当调用它的方法lines.next()时，会返回一个string。上面程序的效果是将csv
+文件中的文本按行打印，每一行的元素都是以逗号分隔符’,’分隔得来。
+
+
+方法二：使用Python的numpy库
+
+有了numpy，python对于数据的处理可以说是如虎添翼，速度也大大提升。使用numpy首先要在前面加载numpy库,代码如下：
+
+import numpy as np
+对于上面的csv文件，下面程序用来读取数据部分：
+
+def loadCSVfile2():
+    tmp = np.loadtxt("train.csv", dtype=np.str, delimiter=",")
+    data = tmp[1:,1:].astype(np.float)#加载数据部分
+    label = tmp[1:,0].astype(np.float)#加载类别标签部分
+    return data, label #返回array类型的数据
+
+三行代码，很简便。最后的结果是array类型，type为float64
+
+
+原文链接：http://blog.csdn.net/dream_angel_z/article/details/48896381
+
+
+############################################################################################################################
+
+
+CSV
+csv文件格式是一种通用的电子表格和数据库导入导出格式。最近我调用RPC处理服务器数据时，经常需要将数据做个存档便使用了这一方便的格式。
+
+简介
+Python csv模块封装了常用的功能，使用的简单例子如下:
+
+# 读取csv文件
+import csv
+with open('some.csv', 'rb') as f:        # 采用b的方式处理可以省去很多问题
+    reader = csv.reader(f)
+    for row in reader:
+        # do something with row, such as row[0],row[1]
+
+#写入
+import csv
+with open('some.csv', 'wb') as f:      # 采用b的方式处理可以省去很多问题
+    writer = csv.writer(f)
+    writer.writerows(someiterable)
+默认的情况下, 读和写使用逗号做分隔符(delimiter)，用双引号作为引用符(quotechar)，当遇到特殊情况是，可以根据需要手动指定字符, 例如:
+
+import csv
+with open('passwd', 'rb') as f:
+    reader = csv.reader(f, delimiter=':', quoting=csv.QUOTE_NONE)
+    for row in reader:
+        print row
+上述示例指定冒号作为分隔符，并且指定quote方式为不引用。这意味着读的时候都认为内容是不被默认引用符(")包围的。quoting的可选项为: QUOTE_ALL, QUOTE_MINIMAL, QUOTE_NONNUMERIC, QUOTE_NONE.
+
+有点需要注意的是，当用writer写数据时， None 会被写成空字符串，浮点类型会被调用 repr() 方法转化成字符串。所以非字符串类型的数据会被 str() 成字符串存储。所以当涉及到unicode字符串时，可以自己手动编码后存储或者使用csv提供的 UnicodeWriter, 具体可参见这里。
+
+字典方式地读写
+csv还提供了一种类似于字典方式的读写，方式如下:
+
+格式如下:
+
+class csv.DictReader(csvfile, fieldnames=None, restkey=None, restval=None, dialect='excel', *args, **kwds)
+
+class csv.DictWriter(csvfile, fieldnames, restval='', extrasaction='raise', dialect='excel', *args, **kwds)
+其中fieldnames指定字典的key值，如果reader里没有指定那么默认第一行的元素，在writer里一定要指定这个。
+
+使用示例
+
+# 读
+>>> import csv
+>>> with open('names.csv') as csvfile:
+...     reader = csv.DictReader(csvfile)
+...     for row in reader:
+...         print(row['first_name'], row['last_name'])
+...
+Baked Beans
+Lovely Spam
+Wonderful Spam
+
+
+# 写
+
+import csv
+with open('names.csv', 'w') as csvfile:
+    fieldnames = ['first_name', 'last_name']
+    writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+
+    writer.writeheader()
+    writer.writerow({'first_name': 'Baked', 'last_name': 'Beans'})
+    writer.writerow({'first_name': 'Lovely', 'last_name': 'Spam'})
+    writer.writerow({'first_name': 'Wonderful', 'last_name': 'Spam'})
+其它
+csv模块还涉及了其它的概念，比如 Dialects, 还提供了供错误处理的 exception csv.Error 等，因为实际使用较少及就不累赘在此。更多参考官方文档。
+原文链接:http://www.cnblogs.com/nisen/p/6155492.html
+
+
+############################################################################################################################
+
+
+python-excel的模块xlrd和xlwt用法及注意事项整理
+本文为整理性文章，将会不定期更新，一旦发现bug就会更新。
+另外一句话总结一下：这三个模块虽然简单易用，但是bug太多，功能太少，无法吐槽，远远没有perl的excel模块好用。
+
+目录：
+一、主要方法列表
+二、已知BUG列表
+三、官方文档下载
+
+一、主要方法列表
+这两个模块的大致用法网上教程一大把，我就不多说了，说说主要方法列表：
+1. xlrd：
+[python] view plain copy print?
+#Workbook:
+wb = xlrd.open_workbook('workbookName_with_path')
+wb.nsheets        #工作簿内工作表的总个数
+wb.sheet_names()  #工作簿内所有工作表名称数组
+ws = wb.sheet_by_index(int)        #通过工作表序号获取工作表，起始下标为0（下同）
+ws = wb.sheet_by_name(u'string')   #通过工作表名称获取工作表
+for ws in wb.sheets():             #遍历所有工作表
+    #something to do with ws
+#Worksheet:
+ws.name #工作表名字
+ws.nrows #工作表总行数（超出将抛出list index out of range 异常）
+ws.ncols #工作表总列数
+ws.row(int)        #通过序号读取行信息，返回列表（每个数据类型为xlrd.sheet.Cell，还需要.value来获取正确数据）
+ws.row_values(int) #同上，不过直接返回value列表
+ws.row_types(int)  #返回行单元格类型列表，0：None，1：string，2：Number，3：date，4：bool，5：error
+
+2. xlwt：
+[python] view plain copy print?
+wb = xlwt.Workbook()
+wb.save('WorkBookName_with_path')
+ws = wb.add_sheet('SheetName',cell_overwrite_ok=True)  #增加sheet，后面的参数是为了可以复写（其实正常情况下，是不应该可以复写的。）
+ws = wb.get_sheet(int)  #根据序号激活工作表
+ws.write(row,col,value/xlwt.Formula('formula_with_no_='))  #将value值写入单元格（row,col）中，采用后面的形式可以写入公式。
+ws.write_merge(x, m, y, n, value/Formula[, sytle])    #写入并且合并单元格，(x，y)是开始单元格，(m,n)是结束单元格。
+
+3. xlutils：
+[python] view plain copy print?
+wb = xlutils.copy.copy(rwb)  #这个模块是用来在xlrd和xlwt之间嫁接桥梁的，可以说是依赖xlrd的，因为必须要初始化xlrd的Book类才能复制。
+ws.write(row,col,value)
+wb.save('WorkBookName')
+
+
+二、已知BUG列表：
+1. 通过xlwt只能写入xls文件，不能写入xlsx文件。文件虽然能生成，但是用excel打不开（测试环境为excel2013）。
+2. 通过xlwt.Formula产生的xls文件虽然能正常打开，但是公式其实是非常不稳定的，关闭的时候会提示公式已经修改，是否保存之类的。
+3. 继续第2点，产生的xls文件里面涉及公式的单元格不能被xlrd正常读取（无论公式本身还是数值）——此问题无解，只能打开文件后保存一下。
+4. 通过xlutils.copy.copy复制得到的工作簿不能还原公式本身，只能得到单元格的值（这个其实不算是bug啦，在文档的48页有描述）。
+
+三、官方文档下载
+下载地址：http://download.csdn.net/detail/samed/9284483
+暂时只用这三个模块（xlrd、xlwt、xlutils）
+
+原文链接：http://blog.csdn.net/samed/article/details/49936409
+
+############################################################################################################################
+
+批量csv文件转换excle代码的两种方法：
+第一种方法：
+#导入相应模块
+import csv
+import xlwt
+import sys
+import os
+reload(sys)
+sys.setdefaultencoding('utf-8')
+
+def csv_to_xls(filename):
+    myexcel = xlwt.Workbook(encoding = 'utf-8')
+    mysheet = myexcel.add_sheet("sheet1")
+    csvfile = open(filename,"rb")
+    reader = csv.reader(csvfile)
+    l = 0
+    for line in reader:
+        r = 0
+        for i in line:
+            mysheet.write(l,r,i)
+            r=r+1
+        l=l+1
+    excel_filename = str(filename.split(".")[0]) + ".xls"
+    myexcel.save(excel_filename)
+    return excel_filename
+
+
+def main():
+    path=r'E:\python\py27\funds'
+    fname_list=[os.path.join(root,fn) for root,dirs,files in os.walk(path) for fn in files]
+    print(len(fname_list))
+    for fname in fname_list:
+        file_name = csv_to_xls(fname)
+        print file_name
+
+if __name__ == '__main__': # 主函数入口
+    main()
+
+
+ 第二种方法
+ 先考虑将一个csv转excel，然后再做个循环就批量了。
+
+单个csv转换
+def csv_to_xls(filename):
+    myexcel = xlwt.Workbook(encoding = 'utf-8')
+    mysheet = myexcel.add_sheet("sheet1")
+    csvfile = open(filename,"rb")
+    reader = csv.reader(csvfile)
+    l = 0
+    for line in reader:
+        r = 0
+        for i in line:
+            mysheet.write(l,r,i)
+            r=r+1
+        l=l+1
+    excel_filename = str(filename.split(".")[0]) + ".xls"
+    myexcel.save(excel_filename)
+    return excel_filename
+然后批量
+for fname in fname_list:
+    csv_to_xls(fname)
+还有考虑中文的时候csv的问题，尽量用utf-8编码
+sys.setdefaultencoding('utf-8')
+
+############################################################################################################################
+
+python读取并写入csv 文件的方法
+新建csvData.csv文件
+      A     B
+1   姓名   学号
+2   小李   123
+3   小张   456
+4   小刘   789
+
+
+
+import csv
+
+# 读取csv文件方式1
+csvFile = open("csvData.csv", "r")
+reader = csv.reader(csvFile)  # 返回的是迭代类型
+data = []
+for item in reader:
+    print(item)
+    data.append(item)
+
+print(data)
+csvFile.close()
+
+# 读取csv文件方式2
+with open("csvData.csv", "r") as csvfile:
+    reader2 = csv.reader(csvfile) # 读取csv文件，返回的是迭代类型
+    for item2 in reader2:
+        print(item2)
+csvFile.close()
+
+# 从列表写入csv文件
+csvFile2 = open('csvFile2.csv','w', newline='') #啊啊啊啊啊啊啊很重要啊啊啊啊啊！！！！！ 设置newline，否则两行之间会空一行
+writer = csv.writer(csvFile2)
+m = len(data)
+for i in range(m):
+    writer.writerow(data[i])
+csvFile2.close()
+
+# 从字典写入csv文件
+dic = {'张三':123, '李四':456, '王二娃':789}
+csvFile3 = open('csvFile3.csv','w', newline='')
+writer2 = csv.writer(csvFile3)
+for key in dic:
+    writer2.writerow([key, dic[key]])
+csvFile3.close()
+
+原文链接：http://www.cnblogs.com/liutongqing/p/6892099.html
+
+
+############################################################################################################################
+
+####写入Csv文件中
+           with open(self.CsvFileName, 'wb') as csvfile:
+               spamwriter = csv.writer(csvfile, dialect='excel')
+               #设置标题
+               spamwriter.writerow(["游戏账号","用户类型","游戏名称","渠道","充值类型","充值金额","返利金额","单号","日期"])
+               #将CsvData中的数据循环写入到CsvFileName文件中
+               for item in self.CsvData:
+                   spamwriter.writerow(item)
+
+
+############################################################################################################################
+#!/usr/bin/Python
+# -*- coding: utf-8 -*-
+import csv
+# csvfile = open('F:/spider_data/csvtext.csv','w',newline='')    #没有newline的话csv文件用excle打开显示的时候中间会多一行
+# writer = csv.writer(csvfile)                                       ##此处为w而非wb
+# writer.writerow(['姓名','年龄','电话'])
+# data = [
+#     ('小李','21','2626565'),
+#     ('小留','21','87989565'),
+#     ('小刘','23','848445')
+#
+# ]
+# writer.writerows(data)
+# csvfile.close()
+
+csvfile = open('F:/spider_data/csvtext.csv','r')                    #此处为r 而非rb
+reader = csv.reader(csvfile)
+for line in reader:
+    print(line)
+csvfile.close()
+
