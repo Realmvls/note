@@ -2,6 +2,26 @@
 参考url：http://blog.csdn.net/abclixu123/article/details/38502993
 参考url： http://cuiqingcai.com/1319.html
 
+在做一个爬虫的时候，有类似上面的很多链接，我用BeautifulSoup怎样得到里边的href和title呢？
+<a class="name" href="http://www.renren.com/profile.do?id=000000000" target="_blank" title="XXX">XXX</a>
+<a class="name" href="http://www.renren.com/profile.do?id=111111111" target="_blank" title="YYY">YYY</a>
+<a class="name" href="http://www.renren.com/profile.do?id=222222222" target="_blank" title="ZZZ">ZZZ</a>
+
+
+f=open("aaaaaa.txt", "wb")
+for url in soup.find_all("a", attrs={"class": "name"}):
+ print url
+ f.write(url.get('href'))
+ f.write(' ')
+ f.write(url.get('title'))
+ f.write('\r\n')
+f.close()
+
+
+这样简单的就能得到我想要的里边的href和title了
+
+
+#############################################################################################################################
 在进入正题前先说一下每次完成代码后，可以用ctrl+alt+l对代码进行自动格式规范化。
 
 在爬取网页中有用的信息时，通常是对存在于网页中的文本或各种不同标签的属性值进行查找，Beautiful Soup中内置了一些查找方式，最常用的是find()和find_all()函数。[文献引自http://blog.csdn.net/abclixu123/article/details/38502993 ]。 同时通过soup.find_all()得到的所有符合条件的结果和soup.select()一样都是列表list，而soup.find()只返回第一个符合条件的结果，所以soup.find()后面可以直接接.text或者get_text()来获得标签中的文本。
@@ -144,3 +164,82 @@ http://cuiqingcai.com/1319.html    ，    http://blog.csdn.net/akak714/article/d
                  http://www.jb51.net/article/92821.htm   #格式化字符串
                  http://www.jb51.net/article/63672.htm
                  http://www.jb51.net/article/67161.htm   python踩坑实录
+
+
+
+ #############################################################################################################################
+ Beautiful Soup使用时，一般可以通过指定对应的name和attrs去搜索，特定的名字和属性，以找到所需要的部分的html代码。
+但是，有时候，会遇到，对于要处理的内容中，其name或attr的值，有多种可能，尤其是符合某一规律，此时，就无法写成固定的值了。
+所以，就可以借助正则表达式来解决此问题。
+比如，
+
+<div class="icon_col">
+    <h1 class="h1user">crifan</h1>
+</div>
+对应的BeautifulSoup代码如下：
+
+h1userSoup = soup.find(name="h1", attrs={"class":"h1user"});
+而如果html是这种：
+
+<div class="icon_col">
+    <h1 class="h1user">crifan</h1>
+    <h1 class="h1user test1">crifan 123</h1>
+    <h1 class="h1user test2">crifan 456</h1>
+</div>
+那么想要一次性地找到所有的，符合条件的h1的部分的代码，则之前的写法，就只能找到单个的class="h1user"的部分，剩下的两个
+
+class="h1user test1"
+class="h1user test2"
+就找不到了。
+那么，此时，就可以用到，BeautifulSoup中非常好用的，非常强大的功能：
+attrs中支持正则表达式的写法
+了。
+就可以写成：
+h1userSoupList = soup.findAll(name="h1", attrs={"class":re.compile(r"h1user(\s\w+)?")});
+就可以一次性地，找到：
+
+class="h1user"
+
+class="h1user test1"
+
+class="h1user test2"
+了。
+
+<div aria-lable="xxx">
+之类的标签，xxx的内容未知（可变）的前提下
+想要查找到对应的此div标签，之前不知道如何实现。
+如果写成：
+sopu.findAll("div", attrs={"aria-lable": "xxx"});
+则xxx必须写出来，如果不写出来属性值，也就没法用上attrs了，就没法实现此处查找特性属性值的标签了。
+所以针对：
+
+<div aria-label="5星, 747 份评分" class="rating" role="img" tabindex="-1">
+ <div>
+ <span class="rating-star">
+ </span>
+ <span class="rating-star">
+ </span>
+ <span class="rating-star">
+ </span>
+ <span class="rating-star">
+ </span>
+ <span class="rating-star">
+ </span>
+ </div>
+ <span class="rating-count">
+ 747 份评分
+ </span>
+</div>
+可以通过：
+
+soup.findAll("div", attrs={"aria-lable": True});
+去查找到属性包含aria-lable的div标签的。
+所以，对于上面的，之前不知道如何处理：
+用BeautifulSoup查找未知属性值，但是已知属性的名字的标签
+则此处，就可以针对：
+
+<div aria-lable="xxx">
+去用：
+
+sopu.findAll("div", attrs={"aria-lable": True});
+就可以查找到对应的包含属性aria-lable的div标签了。
