@@ -243,3 +243,17 @@ soup.findAll("div", attrs={"aria-lable": True});
 
 sopu.findAll("div", attrs={"aria-lable": True});
 就可以查找到对应的包含属性aria-lable的div标签了。
+
+
+##############################################################################################################################
+IP和端口 tr.td 标签里面，tr有class属性，属性有两种情况的值，
+对于这点我们可以用正则表达式来匹配下。当提取某一个标签里的具体内容时，
+可以用bs的 .string属性，注意：用 .string 属性来提取标签里的内容时，
+该标签应该是只有单个节点的。比如上面的 td 标签那样。下面直接上代码了
+
+#匹配带有class属性的tr标签
+taglist = soup.find_all('tr', attrs={'class': re.compile("(odd)|()")})
+for trtag in taglist:
+    tdlist = trtag.find_all('td')  #在每个tr标签下,查找所有的td标签
+    print tdlist[1].string   #这里提取IP值
+    print tdlist[2].string   #这里提取端口值

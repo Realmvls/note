@@ -1,5 +1,5 @@
 python3 文件读写        #http://www.cnblogs.com/xp1005/p/6306861.html
-open
+open                                                                            #robots.txt机器人协议
 
 f = open('filename','r') # 读模式
 f = open('filename','w') # 写模式
