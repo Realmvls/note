@@ -1,0 +1,128 @@
+http://blog.csdn.net/offbye/article/details/52235139    Python爬虫突破封禁的6种常见方法
+http://blog.csdn.net/zhanghaipeng1989/article/details/40828377  用python爬虫抓站的一些技巧     （网页失效搜文字亦可）
+
+爬虫被封禁常见原因列表
+首先，检查JavaScript。如果你从网络服务器收到的页面是空白的，缺少信息，或其遇到他不符合你预期的情况（或者不是你在浏览器上看到的内容），有可能是因为网站创建页面的JavaScript执行有问题。
+检查正常浏览器提交的参数。如果你准备向网站提交表单或发出POST请求，记得检查一下页面的内容，看看你想提交的每个字段是不是都已经填好，而且格式也正确。用Chrome浏览器的网络面板（快捷键F12打开开发者控制台，然后点击“Network”即可看到）查看发送到网站的POST命令，确认你的每个参数都是正确的。
+是否有合法的Cookie？如果你已经登录网站却不能保持登录状态，或者网站上出现了其他的“登录状态”异常，请检查你的cookie。确认在加载每个页面时cookie都被正确调用，而且你的cookie在每次发起请求时都发送到了网站上。
+IP被封禁？如果你在客户端遇到了HTTP错误，尤其是403禁止访问错误，这可能说明网站已经把你的IP当作机器人了，不再接受你的任何请求。你要么等待你的IP地址从网站黑名单里移除，要么就换个IP地址（可以去星巴克上网）。如果你确定自己并没有被封杀，那么再检查下面的内容。
+确认你的爬虫在网站上的速度不是特别快。快速采集是一种恶习，会对网管的服务器造成沉重的负担，还会让你陷入违法境地，也是IP被网站列入黑名单的首要原因。给你的爬虫增加延迟，让它们在夜深人静的时候运行。切记：匆匆忙忙写程序或收集数据都是拙劣项目管理的表现；应该提前做好计划，避免临阵慌乱。
+还有一件必须做的事情：修改你的请求头！有些网站会封杀任何声称自己是爬虫的访问者。如果你不确定请求头的值怎样才算合适，就用你自己浏览器的请求头吧。
+确认你没有点击或访问任何人类用户通常不能点击或接入的信息。
+如果你用了一大堆复杂的手段才接入网站，考虑联系一下网管吧，告诉他们你的目的。试试发邮件到webmaster@<域名>或admin@<域名>，请求网管允许你使用爬虫采集数据。管理员也是人嘛！
+
+
+
+Requests基础发送请求
+所有requests请求均返回response对象
+requests.get(url) 通过get方式发送请求
+参数可以通过url+?+key=value&…方式添加
+也可以dict={key:value}，requests.get(url,params=dict)方式添加
+requests.post(url) 通过post方式发送请求
+参数可以通过dict={key:value}, requests.post(url,data=dict)方式添加
+如果不以表单形式提交，request.post(url,data=json.dumps(dict))
+requests.get(url, headers = headers) 定制请求头
+headers的内容可以审查里查看request header里内容
+requests.get(url,cookies = cookies) 发送cookies到服务器
+cookies = dict(Cookies=’working’) key和value都从request hearder里查看（用于免登陆）
+response.cookies可以获得可用于登陆的cookie，但是只能从post方法的requests得到cookies
+requests.utils.dict_from_cookiejar(cookies) 将cookie转换为dict
+requests.get(url, proxies=proxies) 使用代理
+requests.get(url, timeout=n) n秒后停止等待响应
+响应内容
+r= requests.get(url)
+r.url 传递的地址
+r.text 文本格式内容
+r.json json格式内容
+r.content 字节格式内容（常用）
+r.status_code 响应状态码
+正常 200 requests.code.ok
+r.headers 服务器响应头
+Session
+Session保持用户的登录信息
+s=requests.Session() 新建Session
+s.headers.update({‘x-test’: ‘true’}) 之后的不用在参数里加上headers
+s.post(url,data)得到cookie后，再s.get(url)可以不通过cookie就可以访问页面
+如何反爬虫
+cookies池，更换cookie意味着更换用户
+proxies池，更换proxy意味着更换IP
+header中伪装浏览器，加入User-Agent及Referer
+设置延迟，time.sleep(1）
+正则表达式常用符号
+.：匹配任意字符，换行符\n除外, 类似一个占位符
+*：匹配前一个字符0次或无限次
+?：匹配前一个字符0次或1次
++：匹配前一个字符1词或无限次
+.*：贪心算法，能找到多少是多少
+.*?：非贪心算法
+\d：匹配数字
+[abc]：abc任意一个
+{m,n}：匹配前一个字符m到n次
+| ：匹配|左右任意一个
+(.*?) ：输出符合条件的，将()里结果返回
+常用方法
+findall：匹配所有符合规律的内容，返回包含结果的列表；
+第一个参数是pattern，第二个是查找范围
+re.S作为findall的第三个参数，让 . 匹配\n
+以列表返回将所有的结果
+content = re.findall(r'<td valign="top">(.*?)</a>', html, re.S)
+search：匹配并提取第一个符合规律的内容，返回一个正表达式对象
+group(1)表示取出()里面的
+url = re.search(r'<a href="(.*?)">', each, re.S).group(1)
+sub：替换符合规律的内容，返回替换后的值
+第一个参数是pattern，第二个参数替换的值，第三个是替换变量
+test_str = re.sub(u'美元|人民币|元|本金|代理|的', '', test_str)
+XPATH
+不同于正则表达式基于内容，XPATH基于结构
+使用lxml包
+from lxml import etree     selector = etree.HTML(html)    selector.xpath('//*[@id="pagelist"]/form/div/text()')[1]
+BeautifulSoup创建对象
+soup = BeautifulSoup(html) 创建对象
+soup = BeautifulSoup(open(‘index.html’)) 从文件中创建对象
+print soup.prettify() 打印soup对象 格式化输出
+Tag
+Tag就是HTML里面的标签
+print soup.[Tag] 查找第一个符合要求的标签
+每个Tag对象都有name和attrs两个属性，attrs可以以dict形式将所有属性打印出来
+print soup.[Tag][key] 得到单独的某个属性值 等价于 soup.[Tag].get(‘key’)
+可以通过soup.[Tag][key]=value 修改值
+可以通过del soup.p[key]删除值
+其他对象
+NavigableString对象 soup.p.string 得到标签里面的内容
+BeautifulSoup对象 表示整个文档的内容，也有name和attrs两个属性即 soup.attrs
+Comment 对象 即注释内容，通过type(soup.a.string)==bs.element.Comment判断
+遍历文件树
+.content 属性可以将tag的子节点以列表的方式输出,通过列表索引获得某个元素
+.children 返回的不是一个list, 通过遍历查看内容
+.descendants 返回tag的所有子孙节点，需要遍历获得内容
+.strints 获得多个内容，需要便利查看
+.sripped_strings 可以去除多余的空格
+.parent 父节点
+.parents 全部父节点，需要遍历
+.next_sibling 属性获取了该节点的下一个兄弟节点，.previous_sibling 则与之相反
+本节点处在统一级的节点
+际文档中的tag的 .next_sibling 和 .previous_sibling 属性通常是字符串或空白，因为空白或者换行也可以被视作一个节点
+.next_siblings 和 .previous_siblings 属性可以对当前节点的兄弟节点迭代输出
+.next_element .previous_element 与 .next_sibling .previous_sibling 不同，它并不是针对于兄弟节点，而是在所有节点，不分层次
+.next_elements 和 .previous_elements 的迭代器就可以向前或向后访问文档的解析内容,就好像文档正在被解析一样
+搜索文件树find_all( name , attrs , recursive , text , **kwargs )
+name 参数 查找名为name的tag, 字符串对象会过滤掉
+传字符串 print soup.find_all(‘a’) 会查找与字符串完整匹配的内容
+传正则表达式 soup.find_all(re.compile(“^b”)) 查找b开头的标签
+传列表 soup.find_all([“a”, “b”]) 会将与列表中任一元素匹配的内容返回
+传True 可以匹配任何值 查找所有的tag
+传方法 如果这个方法返回 True 表示当前元素匹配并且被找到,如果不是则反回 False
+def has_class_but_no_id(tag):    return tag.has_attr('class') and not tag.has_attr('id')
+keyword参数 如果一个指定名字的参数不是搜索内置的参数名,搜索时会把该参数当作指定名字tag的属性来搜索,如果包含一个名字为 id 的参数,Beautiful Soup会搜索每个tag的”id”属性
+可以使用多个制定名字的参数同时过滤
+soup.find_all(href=re.compile("elsie"), id='link1')
+想用 class 过滤，不过 class 是 python 的关键词，这怎么办？加个下划线就可以
+soup.find_all("a", class_="sister")
+可以通过 find_all() 方法的 attrs 参数定义一个字典参数来搜索包含特殊属性的tag
+data_soup.find_all(attrs={"data-foo": "value"})
+text参数 可以搜搜文档中的字符串内容.与 name 参数的可选值一样, text 参数接受 字符串 , 正则表达式 , 列表, True
+limit参数 limit=n 只返回前n个结果
+recursive 设置recursive=False 则只检查子节点
+其他方法
+find( name , attrs , recursive , text , **kwargs ) 直接返回结果而不是列表
+类似的还有搜索父节点、兄弟节点、旁边节点等等
