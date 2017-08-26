@@ -2,8 +2,110 @@ PhantomJS 是一个基于 WebKit 的服务器端 JavaScript API。
 它全面支持web而不需浏览器支持，其快速，原生支持各种Web标准： DOM 处理, CSS 选择器, JSON, Canvas, 和 SVG。
 PhantomJS 可以用于 页面自动化 ， 网络监测 ， 网页截屏 ，以及 无界面测试 等
 
+任何动态产生的内容，要么是本地计算，要么是从服务器获取的。
+前者看js，后者抓包。
+后者经常配上各种参数加密，不过既然浏览器能正确发送参数，那么就证明肯定有办法模拟。
+如果有能力，模拟发包。
+如果嫌麻烦，用现成的包操作浏览器
+
+
 以下是selenium的基本知识点总结
 http://www.cnblogs.com/BigFishFly/p/6380024.html
 http://cuiqingcai.com/2599.html
 http://blog.csdn.net/qw_xingzhe/article/details/54930895  常用方法总结
 http://blog.csdn.net/bzd_111/article/details/50496500
+
+selenium驱使浏览器自动化工作中，不同的浏览器需要不同的浏览器驱动（例如chrome的chromedriver），浏览器和浏览器驱动的版本号也要对应，
+不同的浏览器有的时候代码也不太一样。。。
+
+
+用selenium模拟知乎登录并下载图片的方法：https://www.zhihu.com/question/46528604?sort=created
+首先导入需要的库和打开待抓取的页面，先实现登录。
+
+首先导入需要的库和打开待抓取的页面，先实现登录。
+from selenium import webdriver
+import time
+from bs4 import BeautifulSoup
+
+
+driver=webdriver.Chrome()                #用chrome浏览器打开
+driver.get("http://www.zhihu.com")       #打开知乎我们要登录
+time.sleep(2)                            #让操作稍微停一下
+driver.find_element_by_link_text('登录').click() #找到‘登录’按钮并点击
+time.sleep(2)
+#找到输入账号的框，并自动输入账号 这里要替换为你的登录账号
+driver.find_element_by_name('account').send_keys('你的账号')
+time.sleep(2)
+#密码，这里要替换为你的密码
+driver.find_element_by_name('password').send_keys('你的密码')
+time.sleep(2)
+#输入浏览器中显示的验证码，这里如果知乎让你找烦人的倒立汉字，手动登录一下，再停止程序，退出#浏览器，然后重新启动程序，直到让你输入验证码
+yanzhengma=input('验证码:')
+driver.find_element_by_name('captcha').send_keys(yanzhengma)
+#找到登录按钮，并点击
+driver.find_element_by_css_selector('div.button-wrapper.command > button').click()
+
+接着得到你登录的cookie并载入目标页美食 - 热门问答，由于用这个包打开浏览器是不记录你之前浏览器的session（cookie、书签等），因此暂时只能用这个方法先登录再进入目标页。
+
+cookie=driver.get_cookies()
+time.sleep(3)
+driver.get('https://www.zhihu.com/topic/19551137/hot')
+time.sleep(5)
+
+定义一个函数，实现将滚轮滑到页面最下方的功能，这个在官方文档中有（为了让页面载入完整，每5秒下移一次，一共下移10次）
+
+def execute_times(times):
+    for i in range(times + 1):
+        driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+        time.sleep(5)
+execute_times(10)
+
+接下来是页面解析，用到BeautifulSoup库，就不多说了
+
+html=driver.page_source
+soup1=BeautifulSoup(html,'lxml')
+authors=soup1.select('a.author-link')
+authors_alls=[]
+authors_hrefs=[]
+for author in authors:
+    authors_alls.append(author.get_text())
+    authors_hrefs.append('http://www.zhihu.com'+author.get('href'))
+authors_intros_urls=soup1.select('span.bio')
+authors_intros=[]
+for authors_intros_url in authors_intros_urls:
+    authors_intros.append(authors_intros_url.get_text())
+
+for authors_all,authors_href,authors_intro in zip(authors_alls,authors_hrefs,authors_intros):
+    data={
+        'author':authors_all,
+        'href':authors_href,
+        'intro':authors_intro
+    }
+    print(data)
+
+
+
+Selenium-测试对象操作之：浏览器滚动条
+#encoding=utf-8
+from selenium import webdriver
+import time,os
+driver = webdriver.Chrome()
+#打开网页
+driver.get(‘https://www.baidu.com/‘)
+driver.maximize_window()
+input_box = driver.find_element_by_id("kw").send_keys(‘selenium‘)
+
+driver.find_element_by_id("su").click()
+time.sleep(3)
+# 将页面滚动条拖到底部
+js = "var q=document.body.scrollTop=100000"
+driver.execute_script(js)
+time.sleep(3)
+# 将滚动条移动到页面的顶部
+js = "var q=document.body.scrollTop=0"
+driver.execute_script(js)
+time.sleep(3)
+# 将滚动条移动到页面的任意位置
+js = "var q=document.body.scrollTop=500"
+driver.execute_script(js)
+time.sleep(3)

@@ -265,3 +265,42 @@ for key,values in  dict.items():
 Google www.google.com
 taobao www.taobao.com
 Runoob www.runoob.com
+
+#########################################################################################################
+将爬取到的图片保存到本地：https://www.zhihu.com/question/50119196
+  http://blog.csdn.net/sinat_33455447/article/details/54375988
+
+三种方法：
+1.使用urlopen方式import urllib
+url = "http://difang.kaiwind.com/zhejiang/jctp/201407/18/W020140718488039321020.jpg"
+data = urllib.urlopen(url).read()
+f = file('save path',"wb")
+f.write(data)
+f.close()
+2.使用urlretrieveimport urllib
+url = "http://difang.kaiwind.com/zhejiang/jctp/201407/18/W020140718488039321020.jpg"
+urllib.urlretrieve(url,'save path')
+3.使用PIL库（重点，使用这种方法的人少，但是通用各种图片，不用担心像素太大之类的问题）import requests
+from cStringIO import StringIO
+from PIL import Image
+url = "http://www.pss-system.gov.cn/sipopublicsearch/servlet/rm/DownLoadServlet?rid=3632624374&blobId=3129238429"
+response = requests.get(url)
+img = Image.open(StringIO(response.content))
+img.save('save path')
+
+
+第四种方法
+import requests
+for i, j in enumerate(imgUrlList):
+    with open('E:/{0}.jpg'.format(i), 'wb') as file:
+        file.write(requests.get(j).content)
+用with进行上下文管理不需要人为的关闭文件，一旦程序退出with模块文件会自动关闭。本地地址可以随便换，这里用的是requests库如果没有安装直接命令行安装：pip3 install requests
+enumerate函数的功能简单解释，例如：list_ = ['a', 'b', 'c']
+for i, j in enumerate(list_):
+    print([i, j])
+输出结果为：[0, 'a']
+           [1, 'b']
+           [2, 'c']
+在这里 i 迭代的是list_的索引值，j 迭代的是元素值！
+
+。
