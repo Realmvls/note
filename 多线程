@@ -1,0 +1,1747 @@
+多线程方法总结：
+ python中使用线程有两种方式，第一种是用thread模块的start_new_thread函数，另一种是用threading模块的Thread类来包装线程对象。
+ threading模块是对thread模块的第二次封装，提供了更好的API来让我们使用。使用threading实现多线程编程都是使用的Thread类，
+ 或者Timer类，Timer是Thread的子类，可以指定时间间隔后在执行某个操作
+使用threading模块的两种方法：第一种：直接引用threading模块中的Thread类并为其创建实例，第二种也是最常用的方法是自己按照需求
+定义一个类然后继承Thread类，再重写run方法实现我们自己的操作。
+逻辑代码是写在run方法中的，但是我们启动线程都是用的start方法，这两个方法是有区别的，如果直接调用run()方法，只是单纯的调用方法，
+而调用start()方法是将线程从新建状态启动编程就绪状态，等待cpu的调度，这里涉及到线程的几种状态，
+start()后线程没有立即运行而是编程就绪状态，当得到cpu时间片后编程运行状态，当run方法结束或者有未处理的异常，
+线程就结束变成死亡状态等待被回收，在运行状态如果遇到资源没有准备好就会变成阻塞状态，当得到资源后再次编程就绪状态等待cpu的调度。
+
+
+博客：http://blog.csdn.net/xiaoputao0903/article/details/25894849
+
+在单个程序中我们经常用多线程来处理不同的工作，尤其是有的工作需要等，那么我们会新建一个线程去等然后执行某些操作，当做完事后线程退出被回收。当一个程序运行时，就会有一个进程被系统所创建，同时也会有一个线程运行，这个线程就是主线程main，在主线程中所创建的新的线程都是子线程，子线程通常都是做一些辅助的事。Python中提供了thread和threading两个模块来支持多线程。这篇介绍一下python的多线程和基本使用，下一篇介绍python多线程同步问题。
+
+        python中使用线程有两种方式，第一种是用thread模块的start_new_thread函数，另一种是用threading模块的Thread类来包装线程对象。
+
+1.使用thread模块
+
+        使用thread模块的start_new_thread函数创建线程并启动。start_new_thread函数原型：
+
+        thread.start_new_thread(function, args[, kwargs])
+
+[plain] view plain copy
+
+    >>> help(thread.start_new_thread)
+
+    Help on built-in function start_new_thread in module thread:
+
+    start_new_thread(...)
+        start_new_thread(function, args[, kwargs])
+        (start_new() is an obsolete synonym)
+
+        Start a new thread and return its identifier.  The thread will call the
+        function with positional arguments from the tuple args and keyword arguments
+        taken from the optional dictionary kwargs.  The thread exits when the
+        function returns; the return value is ignored.  The thread will also exit
+        when the function raises an unhandled exception; a stack trace will be
+        printed unless the exception is SystemExit.
+    (END)
+
+        这个函数创建一个新线程，并立刻执行函数function，args是该函数function的参数，是一个元组，kwargs是可选的，它为函数提供了命名参数字典。该函数返回一个整数，为线程标示符。function函数执行完后线程正常退出，如果执行过程中有未处理的异常，线程会异常退出。
+
+        thread模块的主要函数：
+
+        1).start_new_thread()
+
+           创建并启动线程执行function函数，function执行完线程退出，或者遇到未处理的异常线程异常退出。
+
+        2).thread.exit()
+
+           结束当前线程，会触发SystemExit异常，如果没有捕获处理该异常，线程会退出。
+
+        3).thread.get_ident()
+
+           得到该线程的标示符，就是新建线程时返回的标示符，是一个整数。
+
+        4).thread.interrupt_main
+
+           在主线程main中触发一个KeyboardInterrupt异常，子线程用这个函数来终止主线程。
+
+        5).thread.allocate_lock()
+
+           创建一个锁对象LockType，使多个线程同步访问共享资源。
+
+        在python中使用多线程更多的是使用第二种方式，即使用threading模块。
+
+2.使用threading模块
+
+        threading模块是对thread模块的第二次封装，提供了更好的API来让我们使用。使用threading实现多线程编程都是使用的Thread类，或者Timer类，Timer是Thread的子类，可以指定时间间隔后在执行某个操作：
+
+[python] view plain copy
+
+    from threading import Timer
+
+    def main():
+        print 'timer test!'
+    t = Timer(3, main)
+    t.start()
+
+        使用Thread类有两种方式，一种是直接创建Thread类的实例，另一种方式是自定义类来继承Thread类。使用Thread类的实例，在它的初始化函数__init__中将可调用的对象作为参数传入，Thread的初始化函数__init__原型：
+
+        __init__(self, group=None, target=None, name=None, args=(), kwargs=None, verbose=None);
+
+group和verbose不知道是什么东西，target是可调用对象，线程启动后就执行它，name为线程的名字，默认为"Thread-N"，N为数字，args和kwargs是调用target是的参数列表和关键字参数。
+group 应当为 None，为将来实现Python Thread类的扩展而保留。
+target 是被 run()方法调用的回调对象. 默认应为None, 意味着没有对象被调用。
+name 为线程名字。默认形式为’Thread-N’的唯一的名字被创建，其中N 是比较小的十进制数。
+args是目标调用参数的tuple，默认为空元组()。
+kwargs是目标调用的参数的关键字dictionary，默认为{}。
+[python] view plain copy
+
+    from threading import Thread
+
+    def main(a, b):
+        print 'a:%d, b:%d' % (a, b)
+
+    Thread(target=main, name='newThread', args=(1, 2)).start()
+
+        自定义类来继承Thread类，然后重写run方法实现我们自己的操作。
+
+[python] view plain copy
+
+    from threading import Thread
+
+
+    class MyThread(Thread):
+
+        def __init__(self, threadName, a, b):
+            Thread.__init__(self, name=threadName)
+            self.a = a
+            self.b = b
+
+        def run(self):
+            print 'a:%d, b:%d' % (self.a, self.b)
+
+
+    myThread = MyThread('newThread', 1, 2)
+    myThread.start()
+
+        逻辑代码是写在run方法中的，但是我们启动线程都是用的start方法，这两个方法是有区别的，如果直接调用run()方法，只是单纯的调用方法，而调用start()方法是将线程从新建状态启动编程就绪状态，等待cpu的调度，这里涉及到线程的几种状态，start()后线程没有立即运行而是编程就绪状态，当得到cpu时间片后编程运行状态，当run方法结束或者有未处理的异常，线程就结束变成死亡状态等待被回收，在运行状态如果遇到资源没有准备好就会变成阻塞状态，当得到资源后再次编程就绪状态等待cpu的调度。
+
+        threading模块的主要类：
+
+        1).Thread类
+
+           上面已经介绍。
+
+        2).Timer类
+
+           Thread的子类，上面已经介绍。
+
+        3).Lock，RLock，Condition类
+
+           同步锁，用于多实现线程同步，资源共享的问题。
+
+        4).Event类
+
+           用于多线程通信。
+
+        多线程同步锁Lock，RLock，Condition和多线程通信Event后面在多线程同步再介绍。
+
+        threading模块Thread类的主要函数：
+
+        1).Thread.getName()，Thread.setName()
+
+           获取和设置线程名字。
+
+        2).Thread.ident()
+
+           获取线程的标示符，是一个整数。
+
+        3).Thread.is_alive()，Thread.isAlive()
+
+           判断线程是不是活的，即线程是否已经结束。
+
+        4).Thread.activeCount()
+
+           获取当前活着的所有线程总数，包括主线程main。
+
+        5).Thread.join()
+
+           使主线程阻塞，知道该子线程执行完或者超时，它有一个参数timeout表示超时时间，默认为None。
+
+        6).Thread.setDaemon()
+
+           有一个布尔值的参数，默认为False，该方法设置子线程是否随主线程一起结束。
+
+        看看join方法和setDaemon方法：
+
+[python] view plain copy
+
+    import threading， time
+
+
+    class MyThread(threading.Thread):
+
+        def __init__(self):
+            threading.Thread.__init__(self)
+
+        def run(self):
+            print 'thread start'
+            time.sleep(3)
+            print 'thread end'
+
+
+    thread1 = MyThread()
+    thread1.start()
+
+    time.sleep(1)
+
+    print 'start join'
+    #thread1.join()
+    print 'end join'
+
+        输出结果：
+
+[python] view plain copy
+
+    不加thread.join
+    thread start
+    start join
+    end join
+    thread end
+
+    加thread.join
+    thread start
+    start join
+    thread end
+    end join
+
+        主线程中sleep(1)一秒就是为了让线程被调度，线程中sleep(3)三秒就是为了让主线程结束，从两种情况的输出结果可以看出join的功能。
+
+[python] view plain copy
+
+    import threading， time
+
+
+    class MyThread(threading.Thread):
+
+        def __init__(self):
+            threading.Thread.__init__(self)
+
+        def run(self):
+            print 'thread start'
+            time.sleep(3)
+            print 'thread end'
+
+
+    print 'main start'
+    thread1 = MyThread()
+    #thread1.setDaemon(True)
+    thread1.start()
+
+    time.sleep(1)
+
+    print 'main end'
+
+        输出结果：
+
+[python] view plain copy
+
+    setDaemon默认为False
+    main start
+    thread start
+    main end
+    thread end
+
+    setDaemon设置为True
+    main start
+    thread start
+    main end
+
+        从打印的结果可以看出，当设置为True的时候，线程还在sleep过程就就结束了，以至于thread end这句都没有打印出来。
+
+        当然Thread类还不止这些方法，这些只是常用的方法，通过help(Thread)可以查看。
+
+
+
+#########################################################################################################################
+Python Thread类表示在单独的控制线程中运行的活动。有两种方法可以指定这种活动：
+1、给构造函数传递回调对象
+
+mthread=threading.Thread(target=xxxx,args=(xxxx))
+mthread.start()
+
+2、在子类中重写run() 方法
+这里举个小例子：
+
+import threading, time
+class MyThread(threading.Thread):
+    def __init__(self):
+        threading.Thread.__init__(self)
+    def run(self):
+        global n, lock
+        time.sleep(1)
+        if lock.acquire():
+            print n , self.name
+            n += 1
+            lock.release()
+if "__main__" == __name__:
+    n = 1
+    ThreadList = []
+    lock = threading.Lock()
+    for i in range(1, 200):
+        t = MyThread()
+        ThreadList.append(t)
+    for t in ThreadList:
+        t.start()
+    for t in ThreadList:
+        t.join()
+
+
+派生类中重写了父类threading.Thread的run()方法，其他方法（除了构造函数)都不应在子类中被重写，换句话说，在子类中只有_init_()和run()方法被重写。使用线程的时候先生成一个子线程类的对象，然后对象调用start()方法就可以运行线程啦（start调用run）
+
+下面我们进入本文的正题threading.Thread类的常用函数与方法：
+1、一旦线程对象被创建，它的活动需要通过调用线程的start()方法来启动。这方法再调用控制线程中的run方法。
+2、一旦线程被激活，则这线程被认为是’alive’(活动)。当它的run()方法终止时-正常退出或抛出未处理的异常，则活动状态停止。isAlive()方法测试线程是否是活动的。大致上，线程从 start()调用开始那点至它的run()方法中止返回时，都被认为是活动的。模块函数enumerate()返回活动线程的列表。
+3、一个线程能调用别的线程的join()方法。这将阻塞调用线程，直到拥有join()方法的线程的调用终止。
+4、线程有名字，默认的是Thread-No形式的，名字能传给构造函数，通过setName()方法设置，用getName()方法获取。
+5、线程能被标识为’daemon thread’(守护线程).这标志的特点是当剩下的全是守护线程时，则python程序退出。它的初始值继承于创建线程。标志用setDaemon()方法设置，用isDaemon()获取。
+6、存在’main thread’(主线程),它对应于Python程序的初始控制线程。它不是后台线程。
+7、
+
+class Thread(group=None, target=None, name=None, args=(), kwargs={})
+
+
+
+构造函数能带有关键字参数被调用。这些参数是:
+group 应当为 None，为将来实现Python Thread类的扩展而保留。
+target 是被 run()方法调用的回调对象. 默认应为None, 意味着没有对象被调用。
+name 为线程名字。默认形式为’Thread-N’的唯一的名字被创建，其中N 是比较小的十进制数。
+args是目标调用参数的tuple，默认为空元组()。
+kwargs是目标调用的参数的关键字dictionary，默认为{}。
+
+8、如果子线程重写了构造函数，它应保证调用基类的构造函数(Thread._init_())，在线程中进行其他工作之前。（也就是派生类刚开始就要调用基类的构造函数）
+
+9、start()
+启动线程活动。在每个线程对象中最多被调用一次。它安排对象的run() 被调用在一单独的控制线程中。
+10、run()
+用以表示线程活动的方法。你可能在Python Thread类的子类重写这方法。标准的 run()方法调用作为target传递给对象构造函数的回调对象。
+11、join([timeout])
+等待至线程中止。阻塞调用线程直至线程的join() 方法被调用中止-正常退出或者抛出未处理的异常-或者是可选的超时发生。
+timeout参数不是None,它应当是浮点数指明以秒计的操作超时值。因为join()总是返回None，你必须调用isAlive()来判别超时是否发生。
+当timeout 参数没有被指定或者是None时，操作将被阻塞直至线程中止。
+线程能被join()许多次。
+线程不能调用自身的join()，因为这将会引起死锁。
+在线程启动之前尝试调用join()会发生错误。
+12、
+getName()
+返回线程名。
+setName(name)
+设置线程名。
+这名字是只用来进行标识目的的字符串。它没有其他作用。多个线程可以取同一名字。最初的名字通过构造函数设置。
+isAlive()
+返回线程是否活动的。
+isDaemon()
+返回线程的守护线程标志。
+setDaemon(daemonic)
+设置守护线程标志为布尔值daemonic。它必须在start()调用之前被调用。
+当没有活动的非守护线程时，整个Python程序退出。
+
+
+
+#########################################################################################################################
+链接：http://www.cnblogs.com/fnng/p/3670789.html3
+
+单线程
+　在好些年前的MS-DOS时代，操作系统处理问题都是单任务的，我想做听音乐和看电影两件事儿，那么一定要先排一下顺序。
+from time import ctime,sleep
+
+def music():
+    for i in range(2):
+        print "I was listening to music. %s" %ctime()
+        sleep(1)
+
+def move():
+    for i in range(2):
+        print "I was at the movies! %s" %ctime()
+        sleep(5)
+
+if __name__ == '__main__':
+    music()
+    move()
+    print "all over %s" %ctime()
+
+ 　　我们先听了一首音乐，通过for循环来控制音乐的播放了两次，每首音乐播放需要1秒钟，sleep()来控制音乐播放的时长。接着我们又看了一场电影，
+每一场电影需要5秒钟，因为太好看了，所以我也通过for循环看两遍。在整个休闲娱乐活动结束后，我通过
+print "all over %s" %ctime()
+看了一下当前时间，差不多该睡觉了。
+>>=========================== RESTART ================================
+>>>
+I was listening to music. Thu Apr 17 10:47:08 2014
+I was listening to music. Thu Apr 17 10:47:09 2014
+I was at the movies! Thu Apr 17 10:47:10 2014
+I was at the movies! Thu Apr 17 10:47:15 2014
+all over Thu Apr 17 10:47:20 2014
+　　其实，music()和move()更应该被看作是音乐和视频播放器，至于要播放什么歌曲和视频应该由我们使用时决定。所以，我们对上面代码做了改造：
+复制代码
+#coding=utf-8
+import threading
+from time import ctime,sleep
+
+def music(func):
+    for i in range(2):
+        print "I was listening to %s. %s" %(func,ctime())
+        sleep(1)
+
+def move(func):
+    for i in range(2):
+        print "I was at the %s! %s" %(func,ctime())
+        sleep(5)
+
+if __name__ == '__main__':
+    music(u'爱情买卖')
+    move(u'阿凡达')
+
+    print "all over %s" %ctime()
+
+　　对music()和move()进行了传参处理。体验中国经典歌曲和欧美大片文化。
+
+>>> ======================== RESTART ================================
+>>>
+I was listening to 爱情买卖. Thu Apr 17 11:48:59 2014
+I was listening to 爱情买卖. Thu Apr 17 11:49:00 2014
+I was at the 阿凡达! Thu Apr 17 11:49:01 2014
+I was at the 阿凡达! Thu Apr 17 11:49:06 2014
+all over Thu Apr 17 11:49:11 2014
+
+多线程
+　科技在发展，时代在进步，我们的CPU也越来越快，CPU抱怨，P大点事儿占了我一定的时间，其实我同时干多个活都没问题的；于是，操作系统就进入了多任务时代。我们听着音乐吃着火锅的不在是梦想。
+python提供了两个模块来实现多线程thread 和threading ，thread 有一些缺点，在threading 得到了弥补，为了不浪费你和时间，所以我们直接学习threading 就可以了。
+继续对上面的例子进行改造，引入threadring来同时播放音乐和视频：
+#coding=utf-8
+import threading
+from time import ctime,sleep
+def music(func):
+    for i in range(2):
+        print "I was listening to %s. %s" %(func,ctime())
+        sleep(1)
+
+def move(func):
+    for i in range(2):
+        print "I was at the %s! %s" %(func,ctime())
+        sleep(5)
+
+threads = []
+t1 = threading.Thread(target=music,args=(u'爱情买卖',))
+threads.append(t1)
+t2 = threading.Thread(target=move,args=(u'阿凡达',))
+threads.append(t2)
+
+if __name__ == '__main__':
+    for t in threads:
+        t.setDaemon(True)
+        t.start()
+
+    print "all over %s" %ctime()
+
+
+import threading
+首先导入threading 模块，这是使用多线程的前提。
+threads = []
+t1 = threading.Thread(target=music,args=(u'爱情买卖',))
+threads.append(t1)
+创建了threads数组，创建线程t1,使用threading.Thread()方法，在这个方法中调用music方法target=music，args方法对music进行传参。 把创建好的线程t1装到threads数组中。
+接着以同样的方式创建线程t2，并把t2也装到threads数组。
+for t in threads:
+    t.setDaemon(True)
+    t.start()
+最后通过for循环遍历数组。（数组被装载了t1和t2两个线程）
+
+setDaemon()
+setDaemon(True)将线程声明为守护线程，必须在start() 方法调用之前设置，如果不设置为守护线程程序会被无限挂起。子线程启动后，父线程也继续执行下去，当父线程执行完最后一条语句print "all over %s" %ctime()后，没有等待子线程，直接就退出了，同时子线程也一同结束。
+
+start()
+开始线程活动。
+
+运行结果：
+>>> ========================= RESTART ================================
+>>>
+I was listening to 爱情买卖. Thu Apr 17 12:51:45 2014 I was at the 阿凡达! Thu Apr 17 12:51:45 2014  all over Thu Apr 17 12:51:45 2014
+从执行结果来看，子线程（muisc 、move ）和主线程（print "all over %s" %ctime()）都是同一时间启动，但由于主线程执行完结束，所以导致子线程也终止。
+继续调整程序：
+
+...
+if __name__ == '__main__':
+    for t in threads:
+        t.setDaemon(True)
+        t.start()
+
+    t.join()
+
+    print "all over %s" %ctime()
+
+　　我们只对上面的程序加了个join()方法，用于等待线程终止。join（）的作用是，在子线程完成运行之前，这个子线程的父线程将一直被阻塞。
+
+　　注意:  join()方法的位置是在for循环外的，也就是说必须等待for循环里的两个进程都结束后，才去执行主进程。
+
+运行结果：
+复制代码
+
+>>> ========================= RESTART ================================
+>>>
+I was listening to 爱情买卖. Thu Apr 17 13:04:11 2014  I was at the 阿凡达! Thu Apr 17 13:04:11 2014
+
+I was listening to 爱情买卖. Thu Apr 17 13:04:12 2014
+I was at the 阿凡达! Thu Apr 17 13:04:16 2014
+all over Thu Apr 17 13:04:21 2014
+
+复制代码
+
+　　从执行结果可看到，music 和move 是同时启动的。
+
+　　开始时间4分11秒，直到调用主进程为4分22秒，总耗时为10秒。从单线程时减少了2秒，我们可以把music的sleep()的时间调整为4秒。
+复制代码
+
+...
+def music(func):
+    for i in range(2):
+        print "I was listening to %s. %s" %(func,ctime())
+        sleep(4)
+...
+
+复制代码
+
+执行结果：
+复制代码
+
+>>> ====================== RESTART ================================
+>>>
+I was listening to 爱情买卖. Thu Apr 17 13:11:27 2014I was at the 阿凡达! Thu Apr 17 13:11:27 2014
+
+I was listening to 爱情买卖. Thu Apr 17 13:11:31 2014
+I was at the 阿凡达! Thu Apr 17 13:11:32 2014
+all over Thu Apr 17 13:11:37 2014
+
+复制代码
+
+　　子线程启动11分27秒，主线程运行11分37秒。
+
+　　虽然music每首歌曲从1秒延长到了4 ，但通多程线的方式运行脚本，总的时间没变化。
+
+
+#########################################################################################################################
+链接 http://www.iteye.com/news/28500-learn-python-thread-by-3-examples
+多线程，资源竞争（其中多线程的代码写得不是很规范，子类继承父类时父类的__init__没有申明
+
+我们将会看到一些在Python中使用线程的实例和如何避免线程之间的竞争。你应当将下边的例子运行多次，以便可以注意到线程是不可预测的和线程每次运行出的不同结果。声明：从这里开始忘掉你听到过的关于GIL的东西，因为GIL不会影响到我想要展示的东西。
+
+实例1
+
+我们将要请求五个不同的url：
+
+单线程
+
+Python代码
+
+    import time
+    import urllib2
+    def get_responses():
+      urls = [
+          'http://www.google.com',
+          'http://www.amazon.com',
+          'http://www.ebay.com',
+          'http://www.alibaba.com',
+          'http://www.reddit.com'
+      ]
+      start = time.time()
+      for url in urls:
+          print url
+          resp = urllib2.urlopen(url)
+          print resp.getcode()
+      print "Elapsed time: %s" % (time.time()-start)
+    get_responses()
+
+
+输出是：
+Python代码
+
+    http://www.google.com 200
+    http://www.amazon.com 200
+    http://www.ebay.com 200
+    http://www.alibaba.com 200
+    http://www.reddit.com 200
+    Elapsed time: 3.0814409256
+
+
+解释：
+
+    url顺序的被请求
+    除非cpu从一个url获得了回应，否则不会去请求下一个url
+    网络请求会花费较长的时间，所以cpu在等待网络请求的返回时间内一直处于闲置状态。
+
+多线程
+Python代码
+
+    import urllib2
+    import time
+    from threading import Thread
+    class GetUrlThread(Thread):
+      def __init__(self, url):
+          self.url = url
+          super(GetUrlThread, self).__init__()
+      def run(self):
+          resp = urllib2.urlopen(self.url)
+          print self.url, resp.getcode()
+    def get_responses():
+      urls = [
+          'http://www.google.com',
+          'http://www.amazon.com',
+          'http://www.ebay.com',
+          'http://www.alibaba.com',
+          'http://www.reddit.com'
+      ]
+      start = time.time()
+      threads = []
+      for url in urls:
+          t = GetUrlThread(url)
+          threads.append(t)
+          t.start()
+      for t in threads:
+          t.join()
+      print "Elapsed time: %s" % (time.time()-start)
+    get_responses()
+
+
+输出:
+Python代码
+
+    http://www.reddit.com 200
+    http://www.google.com 200
+    http://www.amazon.com 200
+    http://www.alibaba.com 200
+    http://www.ebay.com 200
+    Elapsed time: 0.689890861511
+
+
+解释：
+
+    意识到了程序在执行时间上的提升
+    我们写了一个多线程程序来减少cpu的等待时间，当我们在等待一个线程内的网络请求返回时，这时cpu可以切换到其他线程去进行其他线程内的网络请求。
+    我们期望一个线程处理一个url，所以实例化线程类的时候我们传了一个url。
+    线程运行意味着执行类里的run()方法。
+    无论如何我们想每个线程必须执行run()。
+    为每个url创建一个线程并且调用start()方法，这告诉了cpu可以执行线程中的run()方法了。
+    我们希望所有的线程执行完毕的时候再计算花费的时间，所以调用了join()方法。
+    join()可以通知主线程等待这个线程结束后，才可以执行下一条指令。
+    每个线程我们都调用了join()方法，所以我们是在所有线程执行完毕后计算的运行时间。
+
+
+关于线程：
+
+    cpu可能不会在调用start()后马上执行run()方法。
+    你不能确定run()在不同线程建间的执行顺序。
+    对于单独的一个线程，可以保证run()方法里的语句是按照顺序执行的。
+    这就是因为线程内的url会首先被请求，然后打印出返回的结果。
+
+实例2
+
+我们将会用一个程序演示一下多线程间的资源竞争，并修复这个问题。
+Python代码
+
+    from threading import Thread
+    #define a global variable
+    some_var = 0
+    class IncrementThread(Thread):
+      def run(self):
+          #we want to read a global variable
+          #and then increment it
+          global some_var
+          read_value = some_var
+          print "some_var in %s is %d" % (self.name, read_value)
+          some_var = read_value + 1
+          print "some_var in %s after increment is %d" % (self.name, some_var)
+    def use_increment_thread():
+      threads = []
+      for i in range(50):
+          t = IncrementThread()
+          threads.append(t)
+          t.start()
+      for t in threads:
+          t.join()
+      print "After 50 modifications, some_var should have become 50"
+      print "After 50 modifications, some_var is %d" % (some_var,)
+    use_increment_thread()
+
+
+多次运行这个程序，你会看到多种不同的结果。
+
+解释：
+
+    有一个全局变量，所有的线程都想修改它。
+    所有的线程应该在这个全局变量上加 1 。
+    有50个线程，最后这个数值应该变成50，但是它却没有。
+
+为什么没有达到50？
+
+    在some_var是15的时候，线程t1读取了some_var，这个时刻cpu将控制权给了另一个线程t2。
+    t2线程读到的some_var也是15
+    t1和t2都把some_var加到16
+    当时我们期望的是t1、t2两个线程使some_var + 2变成17
+    在这里就有了资源竞争。
+    相同的情况也可能发生在其它的线程间，所以出现了最后的结果小于50的情况。
+
+解决资源竞争
+Python代码
+
+    from threading import Lock, Thread
+    lock = Lock()
+    some_var = 0
+    class IncrementThread(Thread):
+      def run(self):
+          #we want to read a global variable
+          #and then increment it
+          global some_var
+          lock.acquire()
+          read_value = some_var
+          print "some_var in %s is %d" % (self.name, read_value)
+          some_var = read_value + 1
+          print "some_var in %s after increment is %d" % (self.name, some_var)
+          lock.release()
+    def use_increment_thread():
+      threads = []
+      for i in range(50):
+          t = IncrementThread()
+          threads.append(t)
+          t.start()
+      for t in threads:
+          t.join()
+      print "After 50 modifications, some_var should have become 50"
+      print "After 50 modifications, some_var is %d" % (some_var,)
+    use_increment_thread()
+
+
+再次运行这个程序，达到了我们预期的结果。
+
+解释：
+
+    Lock 用来防止竞争条件
+    如果在执行一些操作之前，线程t1获得了锁。其他的线程在t1释放Lock之前，不会执行相同的操作
+    我们想要确定的是一旦线程t1已经读取了some_var，直到t1完成了修改some_var，其他的线程才可以读取some_var
+    这样读取和修改some_var成了逻辑上的原子操作。
+
+实例3
+
+让我们用一个例子来证明一个线程不能影响其他线程内的变量（非全局变量）。
+
+time.sleep()可以使一个线程挂起，强制线程切换发生。
+Python代码
+
+    from threading import Thread
+    import time
+    class CreateListThread(Thread):
+      def run(self):
+          self.entries = []
+          for i in range(10):
+              time.sleep(1)
+              self.entries.append(i)
+          print self.entries
+    def use_create_list_thread():
+      for i in range(3):
+          t = CreateListThread()
+          t.start()
+    use_create_list_thread()
+
+
+运行几次后发现并没有打印出争取的结果。当一个线程正在打印的时候，cpu切换到了另一个线程，所以产生了不正确的结果。我们需要确保print self.entries是个逻辑上的原子操作，以防打印时被其他线程打断。
+
+我们使用了Lock()，来看下边的例子。
+Python代码
+
+    from threading import Thread, Lock
+    import time
+    lock = Lock()
+    class CreateListThread(Thread):
+      def run(self):
+          self.entries = []
+          for i in range(10):
+              time.sleep(1)
+              self.entries.append(i)
+          lock.acquire()
+          print self.entries
+          lock.release()
+    def use_create_list_thread():
+      for i in range(3):
+          t = CreateListThread()
+          t.start()
+    use_create_list_thread()
+
+
+这次我们看到了正确的结果。证明了一个线程不可以修改其他线程内部的变量（非全局变量）
+
+
+######################################################################################################################
+链接：http://blog.csdn.net/kellyseeme/article/details/51473552
+
+1、多线程的发展背景
+
+随着计算机的发展，无论是硬件还是软件都在快速的发展。
+在最开始的时候，计算机都是只有一个cpu来进行指令控制和运算，程序执行的时候都是一个进程一个进程的运行，也就是顺序执行的方式，所有的进程都是排成一个队列，然后cpu取出其中的一个进程，然后运行。
+在硬件发展的时候，慢慢发展为几颗cpu，并且发展出来了几核cpu，从而在一般的服务器上都是四核的，并且至少是两颗，从而在每次服务器进行处理的时候，都是进行多进程的处理，可能说一颗cpu处理一个进程的情况出现，从而在这个时候，程序也就发展了多进程多线程的概念，在一个进程中有多个线程，而一个程序又可以运行多个线程。
+在多进程和多线程主要发展出来的目标，也就是提高计算的性能，从而在这里的编程就称之为多线程编程，multi threading。
+
+2、 Python中的多线程
+在python中，多线程是存在的，但是和其他编程中的多线程是不一样的，也就是在一个进程中存在着多个线程，但是，很遗憾的是，在python中仅仅支持一个线程的运行，也就是说，在python中的多线程依旧像是单线程的运行。
+在python中存在一个锁，也就是GIL，global interpreter lock，全局解释器锁，用来控制在同一时刻只有仅仅一个线程的运行。在python中，多线程的执行方式如下：
+看到上面这种情况，也就是在一个进程里的确是可以有多个线程，但是同一时刻还是只有一个线程的运行，那么为什么还要使用多线程呢，用一个线程不就好了？
+在python中，多线程的最好的处理的问题是对I/O密集型的操作，也就是说，在计算密集型的操作的时候，是不适合使用多线程的，因为在同一时刻，还是只有一个线程使用到cpu，但是I/O是阻塞的方式，从而python的多线程还是用在I/O操作上面，例如有大量用户的输入等IO操作。
+如果是计算密集型的操作，那么在python中，更适合使用多进程的方式，在python中，使用多进程的时候，没有像线程锁的这种限制。
+
+3、 进程和线程的区别
+进程的英文表示为process，线程的英文表示为thread。
+进程消耗的资源（主要是内存）比线程需要消耗的资源要多，进程具有自己独立的数据空间；而在线程中，线程都是存在于一个进程当中，从而所有的线程都是共享资源的，线程之间的数据通信很简单，而进程间的通信需要使用到IPC，inter process comminication，可能就要使用socket进行通信，线程之间的通信，可以使用一个数据结构的容器就可以进行通信，例如数据结构Queue，这个是一个先进先出的数据结构，可以用来线程之间的通信。
+在运行程序的时候，操作系统管理进程，进程中存在线程，其实是进程管理线程，如果具有多个线程，那么主线程就会管理子线程，在运行程序的时候，最开始就是一个进程一个主线程，主线程会管理子线程。
+在操作系统中，我们可以直接查询到进程号，也就是进程的PID，可以直接杀死一个进程，但是我们不能直接杀死一个线程，查询进程的id如下所示：
+[python] view plain copy
+
+    [root@python 521]# ps -ef|grep server |grep -v grep
+    root     10981  1677  0 00:28 pts/0    00:00:00 python server.py
+
+在其中pid为10981，从而可以使用kill命令直接杀死进程，然而并不能查到线程的pid，也就不能杀死一个线程。
+线程的结束，要么是线程自己运行结束，要么就是主线程杀死子线程。
+在线程中还有一个就是守护线程，守护线程，也就是在后台运行，主线程不会等待守护线程。使用守护进程的好处就是，主线程不用理会守护线程，如果主线程退出了，那么守护线程也就自动销毁了，守护线程的好处就是主线程不需要花时间来管理。
+
+4、 python中的多线程模块介绍
+在python中，多线程的模块一个是thread模块，还有一个是threading模块，推荐使用threading模块，因为threading属于高级模块，进行了大量的封装，东西总是越高级越好嘛。其实主要原因是，在thread模块中，你需要自己来进行管理子线程和主线程之间同步的问题，而在threading模块中，已经进行了相关的封装，从而不需要管同步的问题。
+
+5、 多线程的例子
+在使用python的多线程的时候，基本步骤如下：
+                         1：直接调用函数
+
+            创建方法3种  2：可调用的类对象      创建多个线程    启动线程
+
+                         3：子类化Thread类
+
+直接调用函数的多线程如下：
+
+[python] view plain copy
+
+    #!/usr/bin/env python
+
+    from threading import Thread
+    import time
+
+    def loop(name,seconds):
+        print 'start loop',name,' at:',time.ctime()
+        time.sleep(1)
+        print 'end loop',name,' at:',time.ctime()
+
+    if __name__ == '__main__':
+        loops = [2,4]
+        nloops = range(len(loops))
+        threads = []
+        print 'starting at :',time.ctime()
+        for i in nloops:
+            t = Thread(target=loop,args=(i,loops[i],))
+            threads.append(t)
+        for i in nloops:
+            threads[i].start()
+        for i in nloops:
+            threads[i].join()
+
+        print 'all DONE at :',time.ctime()
+
+
+在这里，主要要做的操作在loop函数中，从而创建多个线程来执行loop函数，在创建线程对象Thread的时候，直接使用的是调用函数的方法，也就是创建线程的第一种方法，直接调用我们要进行操作的函数。
+
+第二种方法使用的是可调用的类对象：
+
+[python] view plain copy
+
+    #!/usr/bin/env python
+
+    from threading import Thread
+    import time
+
+    def loop(name,seconds):
+        print 'start loop',name,' at:',time.ctime()
+        time.sleep(1)
+        print 'end loop',name,' at:',time.ctime()
+
+    class ThreadFunc(object):
+        def __init__(self,func,args,name=''):
+            self.name = name
+            self.func = func
+            self.args = args
+
+        def __call__(self):
+            self.func(*self.args)
+
+    if __name__ == '__main__':
+        loops = [2,4]
+        nloops = range(len(loops))
+        threads = []
+        print 'starting at :',time.ctime()
+        for i in nloops:
+            t = Thread(target=ThreadFunc(loop,(i,loops[i]),loop.__name__))
+            threads.append(t)
+        for i in nloops:
+            threads[i].start()
+        for i in nloops:
+            threads[i].join()
+
+        print 'all DONE at :',time.ctime()
+
+
+在使用可调用类对象的时候，主要就是在类的定义中，需要定义个特殊的方法__call__，然后在创建Thread的时候，需要使用直接使用target为可调用对象的实例化。
+
+
+第三种方法主要就是子类化，代码如下：
+
+[python] view plain copy
+
+    #!/usr/bin/env python
+
+    from threading import Thread
+    import time
+
+    def loop(name,seconds):
+        print 'start loop',name,' at:',time.ctime()
+        time.sleep(1)
+        print 'end loop',name,' at:',time.ctime()
+
+    class ThreadFunc(Thread):
+        def __init__(self,func,args,name=''):
+            super(ThreadFunc,self).__init__()
+            self.name = name
+            self.func = func
+            self.args = args
+
+        def run(self):
+            self.func(*self.args)
+
+    if __name__ == '__main__':
+        loops = [2,4]
+        nloops = range(len(loops))
+        threads = []
+        print 'starting at :',time.ctime()
+        for i in nloops:
+            t = ThreadFunc(loop,(i,loops[i]),loop.__name__)
+            threads.append(t)
+        for i in nloops:
+            threads[i].start()
+        for i in nloops:
+            threads[i].join()
+
+        print 'all DONE at :',time.ctime()
+
+
+
+这种方法和第二种方法大同小异，主要就是在子类的时候集成Thread类，然后将可调用的方法修改为run方法即可，在Thread类对象中，如果需要继承，那么主要就是将run方法进行重写。
+
+执行结果如下：
+
+[python] view plain copy
+
+    [root@python 522]# python thread_demo.py
+    starting at : Sun May 22 03:44:49 2016
+    start loop 0  at: Sun May 22 03:44:49 2016
+    start loop 1  at: Sun May 22 03:44:49 2016
+    end loop 0  at: Sun May 22 03:44:50 2016
+    end loop 1  at: Sun May 22 03:44:50 2016
+    all DONE at : Sun May 22 03:44:50 2016
+
+
+
+在一般推荐的方法中，是使用第三种方法，也就是子类化Thread类。
+
+在这里用了三个循环，主要的目的是在进行创建的时候，不需要开启线程，从而在第二循环中，开启所有的线程。
+
+
+6、 Thread基本方法
+在threading的Thread类中，主要的方法是run方法，也就是在使用target初始化的时候关联的方法。
+Thread实例的时候，提供target参数，就是需要执行的函数，另外一个args参数就是函数的参数，必须用元祖的形式提供，如果只有一个参数，必须在一个参数后加一个逗号，表示为元祖。
+join表示主线程需不需要等待子线程，如果不需要，那么可以不调用join函数，在上面例子中，调用了join函数，从而主线程需要等待子线程，在使用了timeout参数之后，那么会表示主线程最多等多少秒，然后继续执行主线程，主线程结束，那么会将子线程结束掉
+setDaemon是设置线程为守护线程，守护线程表示一个不重要线程，主线程结束，那么守护线程也就结束了，可以使用方法isDaemon来判断是否为守护线程
+getname表示返回线程的名称，setname表示设置线程的名称，isalive表示线程是否还在运行
+在设置守护线程的时候，必须在启动方法也就是start之前进行设置。
+
+7、 线程之间的通信
+具体的流程如下：
+也就是生产者线程产生数据写入到共享数据中，然后消费者线程从共享数据中取出数据。
+具体代码如下：
+[python] view plain copy
+
+    #!/usr/bin/env python
+
+    from threading import Thread
+    import time
+    from Queue import Queue
+
+    def writeQ(queue,i):
+        while True:
+            time.sleep(1)
+            if queue.full():
+                time.sleep(1)
+            else:
+                queue.put('xxx')
+                print 'producting object for Q..',i
+
+    def readQ(queue,i):
+        while True:
+            time.sleep(1)
+            if queue.empty():
+                time.sleep(1)
+                print 'empty'
+            else:
+                val = queue.get()
+                print 'consumed object from Q..size now:',queue.qsize(),' consumer ' ,i
+
+    class Producter(Thread):
+        def __init__(self,func,args,name=''):
+            super(Producter,self).__init__()
+            self.name = name
+            self.args = args
+            self.func = func
+
+        def run(self):
+            self.res = self.func(*self.args)
+            #return self.res
+
+    class Consumer(Thread):
+        def __init__(self,func,args,name=''):
+            super(Consumer,self).__init__()
+            self.name = name
+            self.args = args
+            self.func = func
+
+        def run(self):
+            self.res = self.func(*self.args)
+            #return self.res
+
+    if __name__ =='__main__':
+        q = Queue(100)
+        for i in range(20):
+            p = Producter(writeQ,(q,'production %s ' % i))
+            p.start()
+        for i in range(2):
+            c = Consumer(readQ,(q,'consumer %s ' % i))
+            c.start()
+
+ 在其中，主要就是使用Queue进行线程间的通信，在以上的代码中，可以进行优化，例如提取公共类，派生子类生产者和消费者。
+
+8、线程是不是可以无限创建
+
+一下测试为测试线程是不是可以无限创建，代码如下：
+[python] view plain copy
+
+    [root@python 522]# cat thread_test.py
+    #!/usr/bin/env python
+
+    from threading import Thread
+
+    def testThread():
+        while True:
+            pass
+    while True:
+        t = Thread(target=testThread)
+        t.start()
+
+
+就是无限的创建线程。
+
+vmstat基准线如下：
+指标解释如下：
+r 表示运行的队列，话说超过5，就很有压力了
+in 表示中断的次数
+cs 表示上下文切换
+us 表示用户cpu时间
+sy 表示系统的cpu时间
+运行一段时间后，发现，这个procs的r数量增长很快，那么表示，有多少个的线程分配到了cpu
+看出来，cpu很繁忙，中断的次数和上下文切换的数量很大，而且用户的cpu时间占比比较多。
+在这个时候，登录系统的时候，会发现系统非常卡，可以看出来脑子。。。CPU根本不够用了。
+杀掉进程之后恢复正常。。那么去掉cpu的限制，那么可以使用如下代码：
+
+[python] view plain copy
+
+    #!/usr/bin/env python
+
+    from threading import Thread
+    from time import sleep
+
+    i=0
+    def testThread():
+        print i
+
+    while True:
+        i += 1
+        t = Thread(target=testThread)
+        t.start()
+
+
+这次测试。。好像没有线程的限制。
+
+
+
+
+#########################################################################################################################
+链接：http://www.cnblogs.com/itdyb/p/5501076.html
+ Python多线程编程
+1.目的：为了并行运行相互独立的子任务，大幅度提高整个任务的效率（异步任务、运算密集型任务）
+UserRequestThread：负责读取用户的输入，可能是一个I/O信道。程序可能会创建多个线程，每个用户一个，请求会放在队列中。
+RequestProcessor：一个负责从队列中获取并且处理请求的线程，为下面这种线程提供了输出
+ReplyThread：负责把给用户的输出取出来，如果是网络应用程序就把结果发送出去，否则就会保存在本地文件系统或者数据库中。
+每个线程都有自己明确的任务。
+2.线程有开始，顺序执行和结束三个阶段
+3.全局解释器锁(GIL)：对Python虚拟机的访问由全局控制锁来控制，正是这个锁能保证同一时刻只有一个线程在运行，python虚拟机按照以下的方式来运行：
+（1），设置GIL （2）切换一个线程去运行 （3）运行：a.指定数量的字节码的指令或者 b.线程主动让出控制
+（4）把线程设置为休眠状态 （5）解锁GIL （6）重复以上
+4.在python中使用线程：_thread和threading模块以及queue模块。其中_thread）和threading模块允许用户自己创建和管理线程。queue模块允许用户创建一个可以用于多线程之间共享数据的队列数据结构
+注意：要避免使用_thread模块。
+_thread.start_new_thread和exit
+5.threading 模块
+5.1Thread类：
+用Thread类，可以用多种方法来创建线程：
+a.创建一个Thread的实例，传给他一个函数
+b.创建一个Thread的实例，创给它的一个科调用的类对象
+c.从Thread派生出一个子类，创建一个这个子类的试验
+函数; start()，run(),join():线程挂起,getName(),setName()
+isAlive(),isDaemon(),setDeamon（）
+用法：threading.Thread(group=None, target=None, name=None, args=(), kwargs={}, *, daemon=None)
+当所有的线程都创建后再一起调用start()函数启动，而不是创建一个启动一个。不用再去管理一堆锁，只要简单的对每个线程调用join（）函数就可以了
+例子：1.构建一个线程类
+复制代码
+
+#-*- encoding:utf-8 -*-
+import threading
+from time import ctime
+
+class MyThread(threading.Thread):
+    def __init__(self,func,args,name=''):
+        threading.Thread.__init__(self)
+        self.func=func
+        self.args=args
+        self.name=name
+
+    def getResult(self):
+        return self.res
+    def run(self):
+        print('starting',self.name,'at',ctime())
+        self.res=self.func(self.args[0],self.args[1])  ####此处需要修改
+        print(self.name,'finished at:',ctime())
+
+复制代码
+
+1.几种递归的运算
+复制代码
+
+from MyThread import MyThread
+from time import ctime,sleep
+
+def fib(x):
+    sleep(0.005)
+    if x<2:
+        return 1
+    else:
+        return (fib(x-2)+fib(x-1))
+
+def fac(x):
+    sleep(0.1)
+    if x<2:
+        return 1
+    return (x*fac(x-1))
+
+def sum(x):
+    sleep(0.1)
+    if x<2:
+        return 1
+    return (x+sum(x-1))
+funcs=[fib,fac,sum]
+n=12
+def main():
+    nfunc=range(len(funcs))
+
+    print('*****SINGLE THREAD')
+    for i in nfunc:
+        print('starting',funcs[i].__name__,'at:',ctime())
+        print(funcs[i](n))
+        print(funcs[i].__name__,'finished at:',ctime())
+    print('******MULTIPLE THREADS')
+    threads=[]
+    for i in nfunc:
+        t=MyThread(funcs[i],(n,),funcs[i].__name__)
+        threads.append(t)
+
+    for i in nfunc:
+        threads[i].start()
+    for i in nfunc:
+        threads[i].join()
+        print(threads[i].getResult())
+    print('All Done')
+
+if __name__=='__main__':
+    main()
+
+复制代码
+
+利用Queue模块解决生产者和消费者问题
+复制代码
+
+from random import  randint
+from time import sleep
+from queue import Queue
+from MyThread import  MyThread
+
+def writeQ(queue):
+    print('producing object for Q...')
+    queue.put('xxx',1)
+    print('size now',queue.qsize())
+
+def readQ(queue):
+    val=queue.get(1)
+    print('consumed object from Q...size now',queue.qsize())
+
+def write(queue,loops):
+    for i in range(loops):
+        writeQ(queue)
+        sleep(randint(1,3))
+
+def reader(queue,loops):
+    for i in range(loops):
+        readQ(queue)
+        sleep(randint(2,5))
+
+funcs=[write,reader]
+nfunc=range(len(funcs))
+
+def main():
+    nloops=randint(2,5)
+    q=Queue(32)
+    threads=[]
+    for i in nfunc:
+        t=MyThread(funcs[i],(q,nloops),funcs[i].__name__)
+        threads.append(t)
+
+    for i in nfunc:
+        threads[i].start()
+
+    for i in nfunc:
+        threads[i].join()
+
+    print('All Done')
+
+if __name__=='__main__':
+    main()
+
+
+######################################################################################################################
+http://blog.csdn.net/a921800467b/article/details/8579915
+
+ 初识python多线程(多线程下载网页图片实例)
+
+我们在做软件开发的时候很多要用到多线程技术。例如如果做一个下载软件像flashget就要用到、像在线视频工具realplayer也要用到因为要同时下载media stream还要播放。其实例子是很多的。
+线程相对进程来说是“轻量级”的，操作系统用较少的资源创建和管理线程。程序中的线程在相同的内存空间中执行，并共享许多相同的资源。
+
+1) 在python中如何创建一个线程对象？
+如果你要创建一个线程对象，很简单，只要你的类继承threading.Thread，然后在__init__里首先调用threading.Thread的__init__方法即可：
+[python] view plain copy
+
+    import threading
+    class MyThread(threading.Thread):
+        def __init__(self,threadname):
+            threading.Thread.__init__(self,name=threadname)
+
+这才仅仅是个空线程，我可不是要他拉空车的，他可得给我干点实在活。很简单，重写类的run()方法即可，把你要在线程执行时做的事情都放到里面
+[python] view plain copy
+
+    import threading,time
+    class MyThread(threading.Thread):
+    def __init__(self,threadname):
+    threading.Thread.__init__(self,name=threadname)
+
+    def run(self):
+
+    '''''
+
+    run 方法
+
+    '''
+    for i in xrange(10):
+    print self.getName,i
+    time.sleep(1)
+
+以上代码如果被执行之后会每隔1秒输出一次信息到屏幕，10次后结束。其中这里getName()是threading.Thread类的一个方法，用来获得这个线程对象的name。还有一个方法setName()当然就是来设置这个线程对象的name的了。
+
+如果要创建一个线程，首先就要先创建一个线程对象
+[python] view plain copy
+
+    my = MyThread('test')
+
+一个线程对象被创建后，他就处于“born”（诞生状态），如何让这个线程对象开始运行呢?只要调用线程对象的start()方法即可
+[python] view plain copy
+
+    import threading,time
+    class MyThread(threading.Thread):
+        def __init__(self,threadname):
+            threading.Thread.__init__(self,name=threadname)
+
+        def run(self):
+            for i in xrange(10):
+                print self.getName(),i
+                time.sleep(1)
+
+    my = MyThread('test')
+    my.start()
+
+现在线程就处于“ready”状态或者也称为“runnable”状态。
+奇怪吗？不是已经start了吗？为什么不称为“running”状态呢？其实是有原因的。因为我们的计算机一般是不具有真正并行处理能力的。我们所谓的多线程只是把时间分成片段，然后隔一个时间段就让一个线程执行一下，然后进入“sleeping ”状态，然后唤醒另一个在“sleeping”的线程，如此循环runnable->sleeping->runnable... ，只是因为计算机执行速度很快，而时间片段间隔很小，我们感受不到，以为是同时进行的。所以说一个线程在start了之后只是处在了可以运行的状态，他什么时候运行还是由系统来进行调度的。
+那一个线程什么时候会“dead”呢？一般来说当线程对象的run方法执行结束或者在执行中抛出异常的话，那么这个线程就会结束了。系统会自动对“dead”状态线程进行清理。
+
+如果一个线程A在执行的过程中需要等待另一个线程tB执行结束后才能运行的话，那就可以在A在调用B的B.join()方法，另外还可以给join()传入等待的时间。
+
+线程对象的setDaemon()方法可以让子线程随着主线程的退出而结束，不过注意的是setDaemon()方法必须在线程对象没有调用start()方法之前调用(默认情况下；在python中，主线程结束后，会默认等待子线程结束后，主线程才退出)。
+[python] view plain copy
+
+    t1 = MyThread('t1')
+    print t1.getName(),t1.isDaemon()
+    t1.setDaemon(True)
+    print t1.getName(),t1.isDaemon()
+    t1.start()
+    print 'main thread exit'
+
+
+当执行到 print 'main thread exit' 后，主线程就退出了，当然t1这个线程也跟着结束了。但是如果不使用t1线程对象的setDaemon()方法的话，即便主线程结束了，还要等待t1线程自己结束才能退出进程。isDaemon()是用来获得一个线程对象的Daemonflag状态的
+
+如何来获得与线程有关的信息呢？
+
+获得当前正在运行的线程的引用
+
+running = threading.currentThread()
+
+获得当前所有活动对象（即run方法开始但是未终止的任何线程）的一个列表
+
+threadlist = threading.enumerate()
+
+获得这个列表的长度
+
+threadcount = threading.activeCount()
+
+查看一个线程对象的状态调用这个线程对象的isAlive()方法，返回1代表处于“runnable”状态且没有“dead”
+
+threadflag = threading.isAlive()
+
+
+2)  线程同歩队列？
+     我们经常会采用生产者/消费者关系的两个线程来处理一个共享缓冲区的数据。例如一个生产者线程接受用户数据放入一个共享缓冲区里，等待一个消费者线程对数据 取出处理。但是如果缓冲区的太小而生产者和消费者两个异步线程的速度不同时，容易出现一个线程等待另一个情况。为了尽可能的缩短共享资源并以相同速度工作 的各线程的等待时间，我们可以使用一个“队列”来提供额外的缓冲区。
+
+      创建一个“队列”对象
+[python] view plain copy
+
+    import Queue
+    myqueue = Queue.Queue(maxsize = 10)
+
+
+Queue.Queue类即是一个队列的同步实现。队列长度可为无限或者有限。可通过Queue的构造函数的可选参数maxsize来设定队列长度。如果maxsize小于1就表示队列长度无限。
+
+将一个值放入队列中
+[python] view plain copy
+
+    myqueue.put(10)
+
+调用队列对象的put()方法在队尾插入一个项目。put()有两个参数，第一个item为必需的，为插入项目的值；第二个block为可选参数，默认为1。如果队列当前为空且block为1，put()方法就使调用线程暂停,直到空出一个数据单元。如果block为0，put方法将引发Full异常。
+
+将一个值从队列中取出
+[python] view plain copy
+
+    myqueue.get()
+
+调用队列对象的get()方法从队头删除并返回一个项目。可选参数为block，默认为1。如果队列为空且block为1，get()就使调用线程暂停，直至有项目可用。如果block为0，队列将引发Empty异常。
+另外：   q.task_done():表示q.get()返回的项目已被处理； q.join():表示直到队列中所有项目均被处理。
+
+我们用一个例子来展示如何使用Queue(实参考于：IBM)
+[python] view plain copy
+
+    #coding:utf-8
+    '''''
+    今天我们来学习一下python里的多线程问题，并用一个多线程爬虫程序来实验。
+    @author FC_LAMP
+    有几点要说明一下：
+    1) 线程之间共享状态、内存、资源,并且它们相互间易于通信。
+    '''
+    import threading,urllib2
+    import datetime,time
+    import Queue
+
+    hosts = ['http://www.baidu.com','http://news.163.com/','http://weibo.com/u/2043979614','http://fc-lamp.blog.163.com']
+
+    class ThreadClass(threading.Thread):
+        def __init__(self,queue):
+            threading.Thread.__init__(self)
+            self.queue = queue
+
+        def run(self):
+            '''''
+              run 方法用于要执行的功能
+            '''
+            #getName()用于获取线程名称
+            while True:
+                #从队列中获取一个任务
+                host = self.queue.get()
+                #抓取工作
+                url = urllib2.urlopen(host)
+                print url.read(500)
+                #标记队列工作已完成
+                self.queue.task_done()
+
+    def main():
+        #创建队列实例
+        queue = Queue.Queue()
+        #生成一个线程池
+        for i in range(len(hosts)):
+            t = ThreadClass(queue)
+            #主程序退出时，子线程也立即退出
+            t.setDaemon(True)
+            #启动线程
+            t.start()
+
+        #向队列中填充数数
+        for host in hosts:
+            queue.put(host)
+
+        #只到所有任务完成后，才退出主程序
+        queue.join()
+
+    if __name__=='__main__':
+
+        st = time.time()
+        main()
+        print '%f'%(time.time()-st)
+
+
+一个关于多线程的SOCKET SERVER:
+[python] view plain copy
+
+    #coding:utf-8
+    import socket
+    import sys
+    import time
+    import Queue
+    import threading
+
+    host = 'localhost'
+    port = 8000
+
+    #创建socket对象
+    s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+
+    #绑定一个特定地址，端口
+    try:
+        s.bind((host,port))
+    except  Exception as e :
+        print 'Bind Failed:%s'%(str(e))
+        sys.exit()
+    print 'Socket bind complete!!'
+
+    #监听连接
+    s.listen(10) #最大连接数10
+
+    #创建连接队列
+    queue = Queue.Queue()
+
+    #创建线程
+    class TaskThread(threading.Thread):
+        def __init__(self):
+            threading.Thread.__init__(self)
+
+        def run(self):
+            while 1:
+                t = queue.get()
+                t.send('welecome.....')
+                #接收数据
+                client_data = t.recv(1024)
+                t.sendall(client_data)
+                #释放资源
+                #t.close()
+
+
+    #接受连接
+    while 1:
+
+        #将连接放入队列
+        conn,addr = s.accept()
+        print 'Connected from %s:%s'%(addr[0],str(addr[1]))
+        queue.put(conn)
+
+        #生成线程池
+        th = TaskThread()
+        th.setDaemon(True)
+        th.start()
+
+        queue.join()
+    s.close()
+
+
+另外一个更实际的例子，我们将多线程来下载某网站的图片：
+[python] view plain copy
+
+    #coding:utf-8
+
+    '''''
+
+    @author:FC_LAMP
+
+    '''
+    import urllib2,urllib,socket
+    import os,re,threading,Queue
+    import cookielib,time,Image as image
+    import StringIO
+    #30 S请求
+    socket.setdefaulttimeout(30)
+
+    #详情页
+    class spiderDetailThread(threading.Thread):
+    header = {
+    'User-Agent':'Mozilla/5.0 (Windows NT 5.1; rv:6.0.2) Gecko/20100101 Firefox/6.0.2',
+    'Referer':'http://www.xxx.com' #这里是某图片网站
+    }
+    dir_path = 'D:/test/'
+
+    def __init__(self,queue):
+    threading.Thread.__init__(self)
+    cookie = cookielib.CookieJar()
+    cookieproc = urllib2.HTTPCookieProcessor(cookie)
+    urllib2.install_opener(urllib2.build_opener(cookieproc))
+    self.queue = queue
+    self.dir_path = dir_address
+
+    def run(self):
+    while True:
+    urls = self.queue.get()
+    for url in urls:
+    res = urllib2.urlopen(urllib2.Request(url=url,headers=self.header)).read()
+    patt = re.compile(r'<title>([^<]+)<\/title>',re.I)
+    patt = patt.search(res)
+    if patt==None:
+    continue
+
+    #获取TITLE
+    title = patt.group(1).split('_')[0]#'abc/\\:*?"<>|'
+    for i in ['\\','/',':','*','?','"',"'",'<','>','|']:
+    title=title.replace(i,'')
+    title = unicode(title,'utf-8').encode('gbk')
+    print title
+    #获取图片
+    cid = url.split('/')[-1].split('c')[-1].split('.')[0]
+    patt = re.compile(r'new\s+Array".∗?<div[>]+>(.∗?)<\/div>"',re.I|re.S)
+    patt =patt.search(res)
+    if not patt:
+    continue
+
+    patt = patt.group(1)
+    src_patt = re.compile(r'.*?src=\'(.*?)\'.*?',re.I|re.S)
+    src_patt = src_patt.findall(patt)
+    if not src_patt:
+    continue
+
+    #创建目录
+    try:
+    path = os.path.join(self.dir_path,title)
+    if not os.path.exists(path):
+    os.makedirs(path)
+    except Exception as e:
+    pass
+    if not os.path.exists(path):
+    continue
+
+    for src in src_patt:
+    name = src.split('/')[-1]
+    #小图
+    s_path = os.path.join(path,name)
+    img = urllib2.urlopen(src).read()
+    im = image.open(StringIO.StringIO(img))
+    im.save(s_path)
+    #中图
+    src = src.replace('_s.','_r.')
+    name = src.split('/')[-1]
+    m_path = os.path.join(path,name)
+    img = urllib2.urlopen(src).read()
+    im = image.open(StringIO.StringIO(img))
+    im.save(m_path)
+    #大图
+    src = src.replace('smallcase','case')
+    src = src.replace('_r.','.')
+    name = src.split('/')[-1]
+    b_path = os.path.join(path,name)
+    img = urllib2.urlopen(src).read()
+    im = image.open(StringIO.StringIO(img))
+    im.save(b_path)
+
+    self.queue.task_done()
+
+    #例表页
+    class spiderlistThread(threading.Thread):
+    header = {
+    'User-Agent':'Mozilla/5.0 (Windows NT 5.1; rv:6.0.2) Gecko/20100101 Firefox/6.0.2',
+    'Referer':'http://www.xxx.com' #这里某图片网站
+    }
+
+    def __init__(self,queue,url):
+    threading.Thread.__init__(self)
+    cookie = cookielib.CookieJar()
+    cookieproc = urllib2.HTTPCookieProcessor(cookie)
+    urllib2.install_opener(urllib2.build_opener(cookieproc))
+    self.queue = queue
+    self.url = url
+
+    def run(self):
+    i = 1
+    while 1:
+    url = '%slist0-%d.html'%(self.url,i)
+    res = urllib2.urlopen(urllib2.Request(url=url,headers=self.header)).read()
+    patt = re.compile(r'<ul\s+id="container"[^>]+>(.*?)<\/ul>',re.I|re.S)
+    patt = patt.search(res)
+    if not patt:
+    break
+    else:
+    res = patt.group(1)
+    patt = re.compile(r'<label\s+class="a">.*?href="(.*?)".*?<\/label>',re.I|re.S)
+    patt = patt.findall(res)
+    if not patt:
+    break
+    self.queue.put(patt)
+    i+=1
+    time.sleep(3)
+
+    self.queue.task_done()
+
+
+    '''''
+    多线程图片抓取
+    '''
+    if __name__=='__main__':
+    print unicode('---=======图片抓取=====----\n先请输入图片的保存地址(一定要是像这样的路径：D:/xxx/ 不然会出现一些未知错误)。\n若不输入,则默认保存在D:/test/ 文件夹会自动创建','utf-8').encode('gbk')
+    dir_address = raw_input(u'地址(回车确定)：'.encode('gbk')).strip()
+    print unicode('抓取工作马上开始.......','utf-8').encode('gbk')
+    if not dir_address:
+    dir_address = 'D:/test/'
+    if not os.path.exists(dir_address):
+    #试着创建目录(多级)
+    try:
+    os.makedirs(dir_address)
+    except Exception as e:
+    raise Exception(u'无法创建目录%s'%(dir_address))
+
+    url = 'http://www.xxx.com/' #这里是某图片网站
+    queue = Queue.Queue()
+    t1 = spiderlistThread(queue,url)
+    t1.setDaemon(True)
+    t1.start()
+
+    t2 = spiderDetailThread(queue)
+    t2.setDaemon(True)
+    t2.start()
+
+    while 1:
+    pass
+
+ ################################################################################################################
+ 链接：http://www.jb51.net/article/63629.htm
+
+      模拟公交地铁ic卡缴车费的例子
+
+ 程是程序设计中的一个重要方面，尤其是在服务器Deamon程序方面。无论何种系统，线程调度的开销都比传统的进程要快得多。
+  Python可以方便地支持多线程。可以快速创建线程、互斥锁、信号量等等元素，支持线程读写同步互斥。美中不足的是，Python的运行在Python 虚拟机上，创建的多线程可能是虚拟的线程，需要由Python虚拟机来轮询调度，这大大降低了Python多线程的可用性。希望高版本的Python可以 解决这个问题，发挥多CPU的最大效率。
+  网上有些朋友说要获得真正多CPU的好处，有两种方法：
+  1.可以创建多个进程而不是线程，进程数和cpu一样多。
+  2.使用Jython 或 IronPython，可以得到真正的多线程。
+  闲话少说，下面看看Python如何建立线程
+  Python线程创建
+  使用threading模块的 Thread类
+  类接口如下
+复制代码 代码如下:
+class  Thread( group=None, target=None, name=None, args=(), kwargs={})
+
+ 需要关注的参数是target和args. target 是需要子线程运行的目标函数，args是函数的参数，以tuple的形式传递。
+  以下代码创建一个指向函数worker 的子线程
+复制代码 代码如下:
+def worker(a_tid,a_account):
+     ...
+th = threading.Thread(target=worker,args=(i,acc) ) ;
+
+启动这个线程
+复制代码 代码如下:
+th.start()
+
+等待线程返回
+复制代码 代码如下:
+threading.Thread.join(th)
+
+或者th.join()
+如果你可以对要处理的数据进行很好的划分，而且线程之间无须通信，那么你可以使用：创建=》运行=》回收的方式编写你的多线程程序。但是如果线程之间需要访问共同的对象，则需要引入互斥锁或者信号量对资源进行互斥访问。
+ 下面讲讲如何创建互斥锁
+创建锁
+复制代码 代码如下:
+g_mutex = threading.Lock()
+  ....
+
+使用锁
+
+复制代码 代码如下:
+for  ... :
+        #锁定，从下一句代码到释放前互斥访问
+        g_mutex.acquire()
+        a_account.deposite(1)
+        #释放
+        g_mutex.release()
+
+最后，模拟一个公交地铁IC卡缴车费的多线程程序
+  有10个读卡器，每个读卡器收费器每次扣除用户一块钱进入总账中，每读卡器每天一共被刷10000000次。账户原有100块。所以最后的总账应该为10000100。先不使用互斥锁来进行锁定（注释掉了锁定代码），看看后果如何。
+
+import time,datetime
+import threading
+
+def worker(a_tid,a_account):
+ global g_mutex
+ print("Str " , a_tid, datetime.datetime.now() )
+ for i in range(1000000):
+  #g_mutex.acquire()
+  a_account.deposite(1)
+  #g_mutex.release()
+ print("End " , a_tid , datetime.datetime.now() )
+
+class Account:
+ def __init__ (self, a_base ):
+  self.m_amount=a_base
+ def deposite(self,a_amount):
+  self.m_amount+=a_amount
+ def withdraw(self,a_amount):
+  self.m_amount-=a_amount
+
+if __name__ == "__main__":
+ global g_mutex
+ count = 0
+ dstart = datetime.datetime.now()
+ print("Main Thread Start At: ", dstart)
+ #init thread_pool
+ thread_pool = []
+ #init mutex
+ g_mutex = threading.Lock()
+ # init thread items
+ acc = Account(100)
+ for i in range(10):
+  th = threading.Thread(target=worker,args=(i,acc) ) ;
+  thread_pool.append(th)
+
+ # start threads one by one
+ for i in range(10):
+  thread_pool[i].start()
+
+ #collect all threads
+ for i in range(10):
+  threading.Thread.join(thread_pool[i])
+ dend = datetime.datetime.now()
+ print("count=", acc.m_amount)
+ print("Main Thread End at: ", dend, " time span ", dend-dstart)
+
+注意，先不用互斥锁进行临界段访问控制，运行结果如下：
+
+从结果看到，程序确实是多线程运行的。但是由于没有对对象Account进行互斥访问，所以结果是错误的，只有3434612，比原预计少了很多。
+
+打开锁后：
+
+
+这次可以看到，结果正确了。运行时间比不进行互斥多了很多,不过这也是同步的代价。
+同时发现，写多线程，多进程类的程序，不能用自带的idle来运行。会有错误。
