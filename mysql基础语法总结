@@ -1,4 +1,4 @@
-mysql 基础总结
+mysql 基础总结         mysql语句最后都要加分号啊啊啊
 开启mysql服务：     net start mysql
 关闭mysql服务：     net stop mysql
 登录mysql：         mysql -uroot -p         #如果设置了密码则在-p后面不空格直接跟密码
@@ -8,16 +8,20 @@ mysql 基础总结
 定位进test数据库里面：use test；
 查看数据库中都有哪些表：show tables；           表分为 表数据 表索引和表结构三部分
 删除user数据库：       drop database user;
+创建y1数据库：      create database y1；
+切换到y1数据库：    use y1；
+查看mysql用到的端口号：show global variables like 'port'；（在python连接数据库时可能用到）mysql默认占用3306端口
 
 创建user表：    create table user(            #id,name,pass 为表字段（表的列头）
                 id int,                         int,varchar 为表属性，可根据需要自己加
-                name varchar,
-                pass varchar
+                name varchar（30）,
+                pass varchar（30）
                 );
 
  查看user表的表字段或表结构：desc user；
  遍历显示user表中所有内容：  select * from user；          #*代表所有字段既所有列
  查看user表中所有name的记录：select name from user；
+ 查看user表中的所有id记录：   select id from user；
  修改表的名字：              rename table user to user1
  删除user表：               drop table user；
  在user表中插入数据：        insert into user (id,name,pass) values (1,"leiwei","456");
@@ -27,6 +31,7 @@ mysql 基础总结
  删除user表中id=2的表；      delete *from user where id=2;
  更新user表中id=1的姓名：    update user set name="qianchen" where id=1;    #mysql中单双引号都可以
  将表操作中所有语句保存下来： mysql -uroot -p123 --tee=D:\mysql.log          #在登录时用
+ 先eiit退出，在net stop mysql关闭mysql服务
 
  后期维护t1表字段（列)
                       1：添加字段：  alter table t1 add age int;                  #(增加age这一列，并定义其int属性)
@@ -91,9 +96,64 @@ mysql帮助方法 ：      ？show
                     1：往t2表中添加普通索引：alter table t2 add index in_name(name);   #在表的name列中添加一个名为in_name的普通索引
                     2：删除t2表中普通索引: alter table t2 drop index in _name;
 
-
+后期维护数据库表字段（列）
+1：添加字段（添加一列）：alter table t1 add age int;     (int为添加的age这一列的属性)
+2：修改字段   ：alter table t1 modify age int not null default 20;
+3：删除字段：  alter table t1 drop age;
+4:修改字段名称（修改列名）：alter table t1 change name userame varchar(30);    (修改列名必须写上属性)
 SQL语言
 1  DDL   数据定义语言
 2  DML   数据操作语言
 3  DQL   数据查询语言
 4  DCL   数据控制语言
+
+##################################################################################3
+mysql 的增删查改，主要是查
+增  -insert
+   insert into t1(username) values('f');
+改  -update
+   update t1 set username='g' where id=6;
+   updata t1 i=77,username='hh' where id=7;   一下修改多个值用逗号隔开
+删  -delete                                  ps:mysql中赋值，比较全为单等号，没有==的用法
+   delete from t1 where id=6;
+
+                        id>=3 and id<=5;  等价于  id between 3 and 5;
+                        id in (1,3,5);    等价于   id = 1 or id =3 or id = 5;
+
+查： -select
+1：选择特定字段
+select pass,id from user where id=3;
+2:给字段取别名  -as       （pass用p代替，id不变）
+select pass as p,id from user where id = 3;   等价于  select pass p,id from user where id =3;
+3取掉列中的重复值
+select distinct name from user;
+4.使用where条件查询
+select *from user where id>3 and id<5;   (其他写法前面已经写了)
+5.查询空值null
+select *from user where pass is null;
+                             is not null;
+6.搜索  like关键字
+select *from  user where name like '%4%';  前后加百分号
+select * from user where name regexp '^.u'  使用正则表达式搜索
+select * from user where name like ‘%4%’ or name like '%5%';
+select * from user where name regexp '(.*4.*)|(.*5.*)';
+
+7使用 order by 对查询结果排序
+select *from user order by id;       升序排序
+select *from user order by id asc;   (asc可省略) 升序排序
+select *from user order by id desc;   降序排序
+
+8使用limit限定输出个数
+select *from user order by id limit 0,5;
+select *from user order by id limit 5;        前5个
+
+9 concat()函数  ---字符串连接符
+select concat("a","-","b");
+select id,name,pass,concat(id,'-',name) id name from user      #这个句好像有问题
+
+10 rand函数   随机顺序
+select *from user order by rand（）
+
+
+
+
