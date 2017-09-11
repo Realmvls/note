@@ -23,6 +23,9 @@ http://blog.csdn.net/bzd_111/article/details/50496500
 selenium驱使浏览器自动化工作中，不同的浏览器需要不同的浏览器驱动（例如chrome的chromedriver），浏览器和浏览器驱动的版本号也要对应，
 不同的浏览器有的时候代码也不太一样。。。
 
+selenium操作浏览器下拉条
+js = "var q=document.body.ScrollTop=2000"
+driver.execute_script(js)
 
 用selenium模拟知乎登录并下载图片的方法：https://www.zhihu.com/question/46528604?sort=created
 首先导入需要的库和打开待抓取的页面，先实现登录。

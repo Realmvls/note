@@ -1,4 +1,33 @@
 python3 文件读写        #http://www.cnblogs.com/xp1005/p/6306861.html
+
+读文本文件（utf-8编码的）：
+f=open('/users/michae/text.txt','r')
+
+python 把内容读到内存中，用一个str对象表示  f.read()
+                                            f.close()
+
+                                            with open('/users/michael/text.txt','r') as f:
+                                                print(f.read())
+
+                                                for line in f.readlines():
+                                                    print(line.strip())       (strip()用去空格)
+
+读二进制文件如图片视频等
+f = open('/users/michae/test.jpg','rb')
+f.read()
+读取非utf-8编码的文件，用encoding参数，遇到夹杂非法编码的字符用errors参数  例如：
+                                                                                 f = open('/users/michael/gbk.txt',encoding='gbk',errors='ignore')
+
+写文件和读文件一样，区别是传入标识符‘w’或者‘wb’表示写文本文件和写二进制文件
+ with open ('/users/michae/text.txt','w') as f：
+     f.writer('hello.world')
+
+
+
+
+
+
+
 open                                                                            #robots.txt机器人协议
 
 f = open('filename','r') # 读模式

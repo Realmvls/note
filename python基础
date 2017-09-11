@@ -1,0 +1,23 @@
+使用[n]获取第n条记录时报错：IndexError:list index out of range
+原因1：list[index]  index超出范围
+    2：list是空的，此时进行list[0]就会出现该错误
+
+type（） 函数可以获取select或者find_all函数取得的结果的类型，可用来分析后续哪些是不能的操作
+
+
+int() 将一个字符串转换为整形
+strip()移除字符串头尾指定的类型，如括号内没有参数则其默认移除空格
+str（）给人看   repr（）给python看
+raw_input（） 接收任何fu类型的输入， 返回字符串类型
+input（）接收合法的python表达式，输入纯数字则为该数字类型，输入字符串时用引号
+
+csv.reader 返回列表对象
+csv.DictReader返回字典对象
+stringIO对象会被python当成文件处理
+有序列表list采用中括号，有序列表元祖tuple用小括号,字典大括号中冒号
+dict的key必须要是不可变对象，list为可变对象，所以不能作为key              key--value
+
+set 和 dict类似 ，也是一组key的集合，但是不存储value，由于key不能重复
+所以在set中没有重复的key，要创建一个set，需要提供一个list作为输入
+例如： s=set（[1,2,3]）
+set 可看作数学意义上的无序和无重复元素的集合

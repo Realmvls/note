@@ -1,2 +1,56 @@
 BeautifulSoup4
-css选择器  select用法
+建议用select进行数据筛选
+
+| soup.find_all('p[class="etitle"]')
+| soup.find_all('p',{'class':'etitle'})
+| soup.find_all(attrs={'class':'etitle'})
+| soup.find_all('td',class_="etitle")
+find_all函数可能会把查出来的字符串弄乱，有一定的局限性
+|print(item['href'])
+|print(item.get('href'))
+
+css样式 class有多个值时的数据筛选方法
+|titles = soup.find_all('span',{'class':'author clearfix'})或者
+|titles = soup.select('.author.clearfix')
+
+ select（css选择器）     soup.select()函数返回为list类型
+ soup.select('.ebox')  查询class='ebox'的所有标签内容
+ soup.select('#index_nav') 通过id查找
+ soup.select('div #index_nav') 查找div标签下的id为index_nav的内容
+ soup.select('.ebox')[0].text  select返回一个list [0] 选择其中的第一个元素  可以用循环打印所有元素
+
+ | tag.get_text()
+ | div .select('img')   查找div标签下的所有img属性的内容
+ 如果要提取tag的属性，直接用 .get()   提取出来的属性和文字都是字符串
+ 提取标签的文字部分，用 .text 或 get_text()  ----》（  find后的结果可用，select后的结果不可用这种方法 ）
+
+ 1.tag中的文字，比如说超链接文本或者一些表格数据，这些属于可遍历字符串
+ 2.tag中的属性，比如图片链接或者下一页的链接或者其他需要的信息，这属于tag对象的属性
+
+ 遍历子标签时每个标签都可用  .attrs 获取属性  用  .text 获取文本
+
+findAll返回一个数组   例：
+                         liresult = soup.findAll('li',attrs={"class":"span"})
+                         for li in liresult:
+                             imageEntitArray = li.findAll('img')
+                             for img in imageEntitArray:
+                                    link = img.get('data-src')
+                       或者
+                       soup.find('div',class_='pro_detail-price').find("span").text
+                       soup.find('div',class_='pro_detail-price').find("span").string
+                       或者
+                       res = soup(class_='pro_detail-price')
+                       for sp in res:
+                           print(sp.span.string)
+                       或者
+                       result = tag.select('div[class="pro_detail-price"]span')
+
+使用[n]获取第n条记录时报错：IndexError:list index out of range
+原因1：list[index]  index超出范围
+    2：list是空的，此时进行list[0]就会出现该错误
+
+
+
+
+
+
