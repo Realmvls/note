@@ -1,3 +1,13 @@
 http://blog.csdn.net/csywwx2008/article/details/17137097   编码相关知识
 http://www.cnblogs.com/feitianyi/p/5297197.html
 http://blog.csdn.net/xfxyy_sxfancy/article/details/39059465
+
+在计算机内存中，统一用unicode编码，当需要保存到硬盘或者需要传输时 转换成UTF-8 编码
+python3的字符串是unicode编码的
+由于python的字符串类型是str，在内存中以unicode表示，一个字符对应若干字节，如果在网络上传输或要保存在磁盘上，就需要把str变成以字节为单位的bytes
+以unicode表示的str通过 encode（）方法可以编码为指定的bytes
+例如   'ABC'.encode('assic')
+       '中文'.encode('utf-8')
+如果我们从网络或者硬盘上读取字节流，那么读到的数据为bytes，要把bytes变成str 就需要用decode（）方法
+例如   b'ABC'.decode('utf-8')
+
