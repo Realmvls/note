@@ -152,7 +152,44 @@ select concat("a","-","b");
 select id,name,pass,concat(id,'-',name) id name from user      #这个句好像有问题
 
 10 rand函数   随机顺序
-select *from user order by rand（）
+select *from user order by rand（）limit 3;    随机选取三个
+
+11 count 统计
+select count(*)    (快)
+       count(id) from user;
+       count(id)from user where name = 'user4';
+
+12 sum 求和
+select sum(id) from user where name='user4';
+
+13 avg 平均数
+select avg(id) from user;
+
+14 min 最小
+select min(id) from user;
+
+15max 最大
+select max(id)from user;
+
+16分组聚和
+例：统计每个人发了几个帖子   (mess为表名)
+select name,count(id) from mess group by name;
+
+统计每个人发了几个帖子 ，并降序排列  （group by 必须写在order by 之前）
+select name,count(id)from mess group by name order by count(id) desc;
+
+17往title字段(列)前加uid字段（列）
+alter table post add uid int after id;
+分组排序之后如想再按条件统计的话加条件不能用where要用having
+例：select name,count(id) tot from mess group by name having tot>=5;
+            给count（id）重命名为tot      mess为表名
+    by必须写在having之前  having是对分组的结果进行的筛选，此时不能用where
+
+18 多表查询
+1.普通多表查询   （优先推荐）
+2.潜逃查询
+3左链接查询
+
 
 
 
