@@ -1,0 +1,9 @@
+Scrapy
+创建项目：scrapy startproject ITcast       #ITcast 为项目名称
+创建爬虫：scrapy genspider itcast "http://itcast.cn"
+         # genspider表示生成一个爬虫（默认scrapy.Spider类）
+         # itcast表示爬虫名（对应爬虫代码里的name参数）
+         # "http://www.itcast.cn"表示允许爬虫爬取的域的范围
+执行爬虫： scrapy crawl itcast
+         #crawl表示启动一个爬虫
+         #itcast表示需要启动的爬虫名称（对应爬虫代码里的name参数）
