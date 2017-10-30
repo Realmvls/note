@@ -1,0 +1,16 @@
+后台运行python程序并标准输出到文件
+现在有test.py程序要后台部署, 里面有输出内容
+
+使用命令:
+
+nohup python -u test.py > test.log 2>&1 &
+最后的&表示后台运行
+2 输出错误信息到提示符窗口
+1 表示输出信息到提示符窗口, 1前面的&注意添加, 否则还会创建一个名为1的文件
+最后会把日志文件输出到test.log文件
+
+查看
+tail -f test.log如果要实时查看日志文件使用命令
+cat test.log查看全部输出使用命令
+
+原文链接：http://www.cnblogs.com/qlshine/p/5926743.html
