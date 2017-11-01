@@ -1,0 +1,6 @@
+python中的staticmethod 主要是方便将外部函数集成到类体中,美化代码结构,重点在不需要类实例化的情况下调用方法
+
+如果你去掉staticmethod,在方法中加self也可以通过实例化访问方法也是可以集成代码
+链接：http://www.cnblogs.com/caoguo/p/4908711.html
+参考链接:http://www.zhihu.com/question/20021164
+知乎Python 中的 classmethod 和 staticmethod 有什么具体用途？
