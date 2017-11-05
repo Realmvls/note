@@ -1,0 +1,137 @@
+DataFrame是一个表格型的数据结构，它含有一组有序的列，每列可以是不同的值类型（数值、字符串、布尔值等）。DataFrame既有行索引也有列索引，它可以被看做由Series组成的字典（公用同一个索引）。跟其他类型的数据结构相比，DataFrame中面向行和面向列的操作基本上是平衡的。其实，DataFrame中的数据是以一个或多个二维块存放的（而不是列表、字典或别的一维数据结构）。
+
+构建DataFrame的办法有很多，最常用的一种是直接传入一个由等长列表或Numpy数组组成的字典。
+
+data = {'state':['Ohio','Ohio','Ohio','Nevada','Nevada'],
+        'year':[2000,2001,2002,2001,2002],
+        'pop':[1.5,1.7,3.6,2.4,2.9]}
+frame = pd.DataFrame(data)
+print frame
+
+结果DataFrame会自动加上索引（跟Series一样），且全部列会被有序排列：
+
+结果
+   pop   state  year
+0  1.5    Ohio  2000
+1  1.7    Ohio  2001
+2  3.6    Ohio  2002
+3  2.4  Nevada  2001
+4  2.9  Nevada  2002
+
+如果指定了列序列，则DataFrame的列就会按照指定顺序进行排列：
+
+frame = pd.DataFrame(data,columns=['year','state','pop'])
+print frame
+1
+2
+输出结果
+   year   state  pop
+0  2000    Ohio  1.5
+1  2001    Ohio  1.7
+2  2002    Ohio  3.6
+3  2001  Nevada  2.4
+4  2002  Nevada  2.9
+跟Series一样，如果传入的列在数据中找不到，就会产生NA值：
+
+frame2 = pd.DataFrame(data,
+                      columns=['year','state','pop','debt'],
+                      index=['one','two','three','four','five'])
+print frame2
+
+结果
+       year   state  pop debt
+one    2000    Ohio  1.5  NaN
+two    2001    Ohio  1.7  NaN
+three  2002    Ohio  3.6  NaN
+four   2001  Nevada  2.4  NaN
+five   2002  Nevada  2.9  NaN
+
+通过类似字典标记的方式或属性的方式，可以将DataFrame的列获取为一个Series：
+
+print frame2['state']
+
+输出结果
+one        Ohio
+two        Ohio
+three      Ohio
+four     Nevada
+five     Nevada
+Name: state, dtype: object
+
+print frame2.year
+
+输出结果
+one      2000
+two      2001
+three    2002
+four     2001
+five     2002
+Name: year, dtype: int64
+
+注意，返回的Series拥有原DataFrame相同的索引，且其name属性也已经被相应地设置好了。行也可以通过位置或名称的方式进行获取，比如用索引字段ix
+
+print frame2.ix['three']
+
+year     2002
+state    Ohio
+pop       3.6
+debt      NaN
+Name: three, dtype: object
+
+列可以通过赋值的方式进行修改。例如，我们可以给那个空的“debt”列赋上一个标量值或一组值：
+
+frame2['debt']=16.5
+print frame2
+
+结果
+       year   state  pop  debt
+one    2000    Ohio  1.5  16.5
+two    2001    Ohio  1.7  16.5
+three  2002    Ohio  3.6  16.5
+four   2001  Nevada  2.4  16.5
+five   2002  Nevada  2.9  16.5
+
+frame2['debt']=np.arange(5)
+print frame2
+
+结果
+       year   state  pop  debt
+one    2000    Ohio  1.5     0
+two    2001    Ohio  1.7     1
+three  2002    Ohio  3.6     2
+four   2001  Nevada  2.4     3
+five   2002  Nevada  2.9     4
+
+将列表或数组赋值给某个列时，其长度必须跟DataFrame的长度相匹配。如果赋值的是一个Series，就会精确匹配DataFrame的索引，所有的空位都将被填上缺失值：
+
+val = pd.Series([-1.2,-1.5,-1.7],index=['two','four','five'])
+frame2['debt'] = val
+print frame2
+
+输出结果
+       year   state  pop  debt
+one    2000    Ohio  1.5   NaN
+two    2001    Ohio  1.7  -1.2
+three  2002    Ohio  3.6   NaN
+four   2001  Nevada  2.4  -1.5
+five   2002  Nevada  2.9  -1.7
+
+为不存在的列赋值会创建出一个新列。关键字del用于删除列。
+
+frame2['eastern'] = frame2.state == 'Ohio'
+print frame2
+
+输出结果
+       year   state  pop  debt eastern
+one    2000    Ohio  1.5   NaN    True
+two    2001    Ohio  1.7  -1.2    True
+three  2002    Ohio  3.6   NaN    True
+four   2001  Nevada  2.4  -1.5   False
+five   2002  Nevada  2.9  -1.7   False
+
+del frame2['eastern']
+print frame2.columns
+
+输出结果
+Index([u'year', u'state', u'pop', u'debt'], dtype='object')
+http://blog.csdn.net/jiahaohappy/article/details/71102017
