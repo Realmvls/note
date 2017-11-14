@@ -1,0 +1,1663 @@
+http://blog.csdn.net/SunCherryDream/article/details/76020359?locationNum=3&fps=1
+
+本节内容
+
+1、数据库介绍
+
+2、mysql管理
+
+3、mysql数据类型
+
+4、常用mysql命令
+
+　　创建数据库
+
+　　外键
+
+　　增删改查表
+
+5、事务
+
+6、索引
+
+7、python 操作mysql 
+
+8、ORM sqlachemy学习
+
+ 
+
+1、数据库介绍
+
+什么是数据库？
+
+数据库（Database）是按照数据结构来组织、存储和管理数据的仓库，
+每个数据库都有一个或多个不同的API用于创建，访问，管理，搜索和复制所保存的数据。
+我们也可以将数据存储在文件中，但是在文件中读写数据速度相对较慢。
+所以，现在我们使用关系型数据库管理系统（RDBMS）来存储和管理的大数据量。所谓的关系型数据库，是建立在关系模型基础上的数据库，借助于集合代数等数学概念和方法来处理数据库中的数据。
+RDBMS即关系数据库管理系统(Relational Database Management System)的特点：
+1.数据以表格的形式出现
+2.每行为各种记录名称
+3.每列为记录名称所对应的数据域
+4.许多的行和列组成一张表单
+5.若干的表单组成database
+
+ 
+
+RDBMS 术语 
+
+在我们开始学习MySQL 数据库前，让我们先了解下RDBMS的一些术语：
+
+数据库: 数据库是一些关联表的集合。.
+数据表: 表是数据的矩阵。在一个数据库中的表看起来像一个简单的电子表格。
+列: 一列(数据元素) 包含了相同的数据, 例如邮政编码的数据。
+行：一行（=元组，或记录）是一组相关的数据，例如一条用户订阅的数据。
+冗余：存储两倍数据，冗余可以使系统速度更快。(表的规范化程度越高，表与表之间的关系就越多；查询时可能经常需要在多个表之间进行连接查询；而进行连接操作会降低查询速度。例如，学生的信息存储在student表中，院系信息存储在department表中。通过student表中的dept_id字段与department表建立关联关系。如果要查询一个学生所在系的名称，必须从student表中查找学生所在院系的编号（dept_id），然后根据这个编号去department查找系的名称。如果经常需要进行这个操作时，连接查询会浪费很多的时间。因此可以在student表中增加一个冗余字段dept_name，该字段用来存储学生所在院系的名称。这样就不用每次都进行连接操作了。)
+主键：主键是唯一的。一个数据表中只能包含一个主键。你可以使用主键来查询数据。
+外键：外键用于关联两个表。
+复合键：复合键（组合键）将多个列作为一个索引键，一般用于复合索引。
+索引：使用索引可快速访问数据库表中的特定信息。索引是对数据库表中一列或多列的值进行排序的一种结构。类似于书籍的目录。
+参照完整性: 参照的完整性要求关系中不允许引用不存在的实体。与实体完整性是关系模型必须满足的完整性约束条件，目的是保证数据的一致性。
+Mysql数据库
+
+Mysql是最流行的关系型数据库管理系统，在WEB应用方面MySQL是最好的RDBMS(Relational Database Management System：关系数据库管理系统)应用软件之一。由瑞典MySQL AB公司开发，目前属于Oracle公司。MySQL是一种关联数据库管理系统，关联数据库将数据保存在不同的表中，而不是将所有数据放在一个大仓库内，这样就增加了速度并提高了灵活性。
+
+Mysql是开源的，所以你不需要支付额外的费用。
+Mysql支持大型的数据库。可以处理拥有上千万条记录的大型数据库。
+MySQL使用标准的SQL数据语言形式。
+Mysql可以允许于多个系统上，并且支持多种语言。这些编程语言包括C、C++、Python、Java、Perl、PHP、Eiffel、Ruby和Tcl等。
+Mysql对PHP有很好的支持，PHP是目前最流行的Web开发语言。
+MySQL支持大型数据库，支持5000万条记录的数据仓库，32位系统表文件最大可支持4GB，64位系统支持最大的表文件为8TB。
+Mysql是可以定制的，采用了GPL协议，你可以修改源码来开发自己的Mysql系统。
+ 
+
+2、mysql管理
+
+MySQL 用户设置
+
+如果你需要添加 MySQL 用户，你只需要在 mysql 数据库中的 user 表添加新用户即可。
+
+以下为添加用户的的实例，用户名为lisi，密码为12345678，并授权用户可进行 SELECT, INSERT 和 UPDATE操作权限：
+
+ 
+
+1  insert into user(host,user,password,select_priv,insert_priv,update_priv) values ('localhost','lisi',password('12345678'),'y','y','y');
+1 flush privileges;
+管理MySQL的命令
+
+以下列出了使用Mysql数据库过程中常用的命令：
+
+USE 数据库名 :选择要操作的Mysql数据库，使用该命令后所有Mysql命令都只针对该数据库。
+
+SHOW DATABASES: 列出 MySQL 数据库管理系统的数据库列表。
+
+SHOW TABLES: #显示指定数据库的所有表，使用该命令前需要使用 use命令来选择要操作的数据库。
+
+SHOW COLUMNS FROM 数据表: #显示数据表的属性，属性类型，主键信息 ，是否为 NULL，默认值等其他信息。
+
+create database testdb charset "utf8"; #创建一个叫testdb的数据库，且让其支持中文 
+
+drop database testdb; #删除数据库
+
+SHOW INDEX FROM 数据表:显示数据表的详细索引信息，包括PRIMARY KEY（主键）。
+
+ 
+
+3、mysql数据类型
+
+MySQL中定义数据字段的类型对你数据库的优化是非常重要的。
+
+MySQL支持多种类型，大致可以分为三类：数值、日期/时间和字符串(字符)类型。
+
+数值类型
+
+MySQL支持所有标准SQL数值数据类型。
+
+这些类型包括严格数值数据类型(INTEGER、SMALLINT、DECIMAL和NUMERIC)，以及近似数值数据类型(FLOAT、REAL和DOUBLE PRECISION)。
+
+关键字INT是INTEGER的同义词，关键字DEC是DECIMAL的同义词。
+
+BIT数据类型保存位字段值，并且支持MyISAM、MEMORY、InnoDB和BDB表。
+
+作为SQL标准的扩展，MySQL也支持整数类型TINYINT、MEDIUMINT和BIGINT。下面的表显示了需要的每个整数类型的存储和范围。
+
+ 
+
+类型	大小	范围（有符号）	范围（无符号）	用途
+TINYINT	1 字节	(-128，127)	(0，255)	小整数值
+SMALLINT	2 字节	(-32 768，32 767)	(0，65 535)	大整数值
+MEDIUMINT	3 字节	(-8 388 608，8 388 607)	(0，16 777 215)	大整数值
+INT或INTEGER	4 字节	(-2 147 483 648，2 147 483 647)	(0，4 294 967 295)	大整数值
+BIGINT	8 字节	(-9 233 372 036 854 775 808，9 223 372 036 854 775 807)	(0，18 446 744 073 709 551 615)	极大整数值
+FLOAT	4 字节	(-3.402 823 466 E+38，1.175 494 351 E-38)，0，(1.175 494 351 E-38，3.402 823 466 351 E+38)	0，(1.175 494 351 E-38，3.402 823 466 E+38)	单精度
+浮点数值
+DOUBLE	8 字节	(1.797 693 134 862 315 7 E+308，2.225 073 858 507 201 4 E-308)，0，(2.225 073 858 507 201 4 E-308，1.797 693 134 862 315 7 E+308)	0，(2.225 073 858 507 201 4 E-308，1.797 693 134 862 315 7 E+308)	双精度
+浮点数值
+DECIMAL	对DECIMAL(M,D) ，如果M>D，为M+2否则为D+2	依赖于M和D的值	依赖于M和D的值	小数值
+ 
+
+日期和时间类型
+
+表示时间值的日期和时间类型为DATETIME、DATE、TIMESTAMP、TIME和YEAR。
+
+每个时间类型有一个有效值范围和一个"零"值，当指定不合法的MySQL不能表示的值时使用"零"值。
+
+TIMESTAMP类型有专有的自动更新特性，将在后面描述。
+
+ 
+
+ 
+
+类型	大小
+(字节)	范围	格式	用途
+DATE	3	1000-01-01/9999-12-31	YYYY-MM-DD	日期值
+TIME	3	'-838:59:59'/'838:59:59'	HH:MM:SS	时间值或持续时间
+YEAR	1	1901/2155	YYYY	年份值
+DATETIME	8	1000-01-01 00:00:00/9999-12-31 23:59:59	YYYY-MM-DD HH:MM:SS	混合日期和时间值
+TIMESTAMP	4	1970-01-01 00:00:00/2037 年某时	YYYYMMDD HHMMSS	混合日期和时间值，时间戳
+字符串类型
+
+字符串类型指CHAR、VARCHAR、BINARY、VARBINARY、BLOB、TEXT、ENUM和SET。该节描述了这些类型如何工作以及如何在查询中使用这些类型。
+
+类型	大小	用途
+CHAR	0-255字节	定长字符串
+VARCHAR	0-65535 字节	变长字符串
+TINYBLOB	0-255字节	不超过 255 个字符的二进制字符串
+TINYTEXT	0-255字节	短文本字符串
+BLOB	0-65 535字节	二进制形式的长文本数据
+TEXT	0-65 535字节	长文本数据
+MEDIUMBLOB	0-16 777 215字节	二进制形式的中等长度文本数据
+MEDIUMTEXT	0-16 777 215字节	中等长度文本数据
+LONGBLOB	0-4 294 967 295字节	二进制形式的极大文本数据
+LONGTEXT	0-4 294 967 295字节	极大文本数据
+CHAR和VARCHAR类型类似，但它们保存和检索的方式不同。它们的最大长度和是否尾部空格被保留等方面也不同。在存储或检索过程中不进行大小写转换。
+
+BINARY和VARBINARY类类似于CHAR和VARCHAR，不同的是它们包含二进制字符串而不要非二进制字符串。也就是说，它们包含字节字符串而不是字符字符串。这说明它们没有字符集，并且排序和比较基于列值字节的数值值。
+
+BLOB是一个二进制大对象，可以容纳可变数量的数据。有4种BLOB类型：TINYBLOB、BLOB、MEDIUMBLOB和LONGBLOB。它们只是可容纳值的最大长度不同。
+
+有4种TEXT类型：TINYTEXT、TEXT、MEDIUMTEXT和LONGTEXT。这些对应4种BLOB类型，有相同的最大长度和存储需求
+
+4、常用mysql命令
+
+　　创建数据库
+
+　　语法
+
+　　
+
+1 CREATE TABLE table_name (column_name column_type);
+创建一个student表
+
+create table student(stu_id int not null auto_increment, name char(32) not null, age int not null, register_date date, primary key (stu_id));
+实例解析：
+
+如果你不想字段为 NULL 可以设置字段的属性为 NOT NULL， 在操作数据库时如果输入该字段的数据为NULL ，就会报错。
+AUTO_INCREMENT定义列为自增的属性，一般用于主键，数值会自动加1。
+PRIMARY KEY关键字用于定义列为主键。 您可以使用多列来定义主键，列间以逗号分隔。
+MySQL 插入数据
+
+语法
+
+1 INSERT INTO table_name ( field1, field2,...fieldN )
+2                        VALUES
+3                        ( value1, value2,...valueN );
+复制代码
+ 1 mysql> insert into student (name,age,register_date) values ("zhangsan",22,"2016-10-26");
+ 2 Query OK, 1 row affected (0.00 sec)
+ 3 
+ 4 mysql> select * from student;
+ 5 +--------+----------+-----+---------------+
+ 6 | stu_id | name     | age | register_date |
+ 7 +--------+----------+-----+---------------+
+ 8 |      1 | zhangsan |  22 | 2016-10-26    |
+ 9 +--------+----------+-----+---------------+
+10 1 row in set (0.00 sec)
+复制代码
+MySQL 查询数据
+
+语法
+
+1 SELECT column_name,column_name
+2 FROM table_name
+3 [WHERE Clause]
+4 [OFFSET M ][LIMIT N]
+复制代码
+ 1 mysql> select * from student;
+ 2 +--------+-----------+-----+---------------+
+ 3 | stu_id | name      | age | register_date |
+ 4 +--------+-----------+-----+---------------+
+ 5 |      1 | zhangsan  |  22 | 2016-10-26    |
+ 6 |      2 | zhangsan1 |  23 | 2016-10-27    |
+ 7 |      3 | zhangsan2 |  24 | 2016-10-28    |
+ 8 |      4 | zhangsan3 |  25 | 2016-10-29    |
+ 9 +--------+-----------+-----+---------------+
+10 4 rows in set (0.00 sec)
+11 
+12 方法一：
+13 mysql> select name from student where name="zhangsan2";
+14 +-----------+
+15 | name      |
+16 +-----------+
+17 | zhangsan2 |
+18 +-----------+
+19 1 row in set (0.00 sec)
+20 
+21 方法二：
+22 mysql> select name,age  from student where name="zhangsan2" and age=24;
+23 +-----------+-----+
+24 | name      | age |
+25 +-----------+-----+
+26 | zhangsan2 |  24 |
+27 +-----------+-----+
+28 1 row in set (0.00 sec)
+复制代码
+查询语句中你可以使用一个或者多个表，表之间使用逗号(,)分割，并使用WHERE语句来设定查询条件。
+SELECT 命令可以读取一条或者多条记录。
+你可以使用星号（*）来代替其他字段，SELECT语句会返回表的所有字段数据
+你可以使用 WHERE 语句来包含任何条件。
+你可以通过OFFSET指定SELECT语句开始查询的数据偏移量。默认情况下偏移量为0。
+你可以使用 LIMIT 属性来设定返回的记录数。
+复制代码
+ 1 mysql> select * from student;
+ 2 +--------+-----------+-----+---------------+
+ 3 | stu_id | name      | age | register_date |
+ 4 +--------+-----------+-----+---------------+
+ 5 |      1 | zhangsan  |  22 | 2016-10-26    |
+ 6 |      2 | zhangsan1 |  23 | 2016-10-27    |
+ 7 |      3 | zhangsan2 |  24 | 2016-10-28    |
+ 8 |      4 | zhangsan3 |  25 | 2016-10-29    |
+ 9 +--------+-----------+-----+---------------+
+10 4 rows in set (0.00 sec)
+复制代码
+复制代码
+ 1 #limit相当于从表中的第几条开始查询，offset代表从前面第几条开始计算的第几条数据。（包含limit那行）
+ 2 方法一：
+ 3 mysql> select * from student limit 2 offset 1;
+ 4 +--------+-----------+-----+---------------+
+ 5 | stu_id | name      | age | register_date |
+ 6 +--------+-----------+-----+---------------+
+ 7 |      2 | zhangsan1 |  23 | 2016-10-27    |
+ 8 |      3 | zhangsan2 |  24 | 2016-10-28    |
+ 9 +--------+-----------+-----+---------------+
+10 2 rows in set (0.00 sec)
+11 
+12 
+13 #下面这个少了个offset，完全就变了。下面说明是从limit指定条开始读，后面1代表读几行。
+14 方法二：
+15 mysql> select * from student limit 2,1;
+16 +--------+-----------+-----+---------------+
+17 | stu_id | name      | age | register_date |
+18 +--------+-----------+-----+---------------+
+19 |      3 | zhangsan2 |  24 | 2016-10-28    |
+20 +--------+-----------+-----+---------------+
+21 1 row in set (0.00 sec)
+复制代码
+ 
+
+MySQL where 子句
+
+语法
+
+1 SELECT field1, field2,...fieldN FROM table_name1, table_name2...
+2 [WHERE condition1 [AND [OR]] condition2.....
+以下为操作符列表，可用于 WHERE 子句中。
+
+下表中实例假定 A为10 B为20
+
+ 
+
+操作符	描述	实例
+=	等号，检测两个值是否相等，如果相等返回true	(A = B) 返回false。
+<>, !=	不等于，检测两个值是否相等，如果不相等返回true	(A != B) 返回 true。
+>	大于号，检测左边的值是否大于右边的值, 如果左边的值大于右边的值返回true	(A > B) 返回false。
+<	小于号，检测左边的值是否小于右边的值, 如果左边的值小于右边的值返回true	(A < B) 返回 true。
+>=	大于等于号，检测左边的值是否大于或等于右边的值, 如果左边的值大于或等于右边的值返回true	(A >= B) 返回false。
+<=	小于等于号，检测左边的值是否小于于或等于右边的值, 如果左边的值小于或等于右边的值返回true	(A <= B) 返回 true。
+
+使用主键来作为 WHERE 子句的条件查询是非常快速的。
+
+复制代码
+1 mysql> select * from student where age > 24;
+2 +--------+-----------+-----+---------------+
+3 | stu_id | name      | age | register_date |
+4 +--------+-----------+-----+---------------+
+5 |      4 | zhangsan3 |  25 | 2016-10-29    |
+6 +--------+-----------+-----+---------------+
+7 1 row in set (0.00 sec)
+复制代码
+MySQL UPDATE 查询
+
+语法
+
+复制代码
+ 1 mysql> select * from student;
+ 2 +--------+-----------+-----+---------------+
+ 3 | stu_id | name      | age | register_date |
+ 4 +--------+-----------+-----+---------------+
+ 5 |      1 | zhangsan  |  22 | 2016-10-26    |
+ 6 |      2 | zhangsan1 |  23 | 2016-10-27    |
+ 7 |      3 | zhangsan2 |  24 | 2016-10-28    |
+ 8 |      4 | zhangsan3 |  25 | 2016-10-29    |
+ 9 +--------+-----------+-----+---------------+
+10 4 rows in set (0.00 sec)
+11 
+12 mysql> update student set age=28 where name="zhangsan3" and age="25";
+13 Query OK, 1 row affected (0.00 sec)
+14 Rows matched: 1  Changed: 1  Warnings: 0
+15 
+16 mysql> select * from student;
+17 +--------+-----------+-----+---------------+
+18 | stu_id | name      | age | register_date |
+19 +--------+-----------+-----+---------------+
+20 |      1 | zhangsan  |  22 | 2016-10-26    |
+21 |      2 | zhangsan1 |  23 | 2016-10-27    |
+22 |      3 | zhangsan2 |  24 | 2016-10-28    |
+23 |      4 | zhangsan3 |  28 | 2016-10-29    |
+24 +--------+-----------+-----+---------------+
+25 4 rows in set (0.00 sec)
+复制代码
+ 
+
+MySQL DELETE 语句
+
+语法：
+
+1 DELETE FROM table_name [WHERE Clause]<br><br>delete from student where stu_id=5; 
+ 
+
+例如：
+
+复制代码
+ 1 mysql> delete from student where name="zhangsan3" and age=28;
+ 2 Query OK, 1 row affected (0.00 sec)
+ 3 
+ 4 mysql> select * from student;
+ 5 +--------+-----------+-----+---------------+
+ 6 | stu_id | name      | age | register_date |
+ 7 +--------+-----------+-----+---------------+
+ 8 |      1 | zhangsan  |  22 | 2016-10-26    |
+ 9 |      2 | zhangsan1 |  23 | 2016-10-27    |
+10 |      3 | zhangsan2 |  24 | 2016-10-28    |
+11 +--------+-----------+-----+---------------+
+12 3 rows in set (0.00 sec)
+复制代码
+ 
+
+MySQL LIKE 子句
+
+语法：
+
+复制代码
+1 SELECT field1, field2,...fieldN table_name1, table_name2...
+2 WHERE field1 LIKE condition1 [AND [OR]] filed2 = 'somevalue'
+3  
+4  
+5 select *from student where name binary like "%Li";
+6 select *from student where name binary like  binary "%Li"; #只匹配大写
+复制代码
+ 
+
+例如：
+
+复制代码
+ 1 mysql> select * from student where name like "zhang%";
+ 2 +--------+-----------+-----+---------------+
+ 3 | stu_id | name      | age | register_date |
+ 4 +--------+-----------+-----+---------------+
+ 5 |      1 | zhangsan  |  22 | 2016-10-26    |
+ 6 |      2 | zhangsan1 |  23 | 2016-10-27    |
+ 7 |      3 | zhangsan2 |  24 | 2016-10-28    |
+ 8 |      5 | zhangsan3 |  25 | 2016-10-29    |
+ 9 +--------+-----------+-----+---------------+
+10 4 rows in set (0.00 sec)
+11 
+12 mysql> select * from student where age  like "24";
+13 +--------+-----------+-----+---------------+
+14 | stu_id | name      | age | register_date |
+15 +--------+-----------+-----+---------------+
+16 |      3 | zhangsan2 |  24 | 2016-10-28    |
+17 +--------+-----------+-----+---------------+
+18 1 row in set (0.00 sec)
+复制代码
+MySQL 排序
+
+1 SELECT field1, field2,...fieldN from table_name1, table_name2...
+2 ORDER BY field1, [field2...] [ASC [DESC]]
+3 使用 ASC 或 DESC 关键字来设置查询结果是按升序或降序排列。 默认情况下，它是按升序排列。
+例如：
+
+复制代码
+ 1 mysql> select * from student;
+ 2 +--------+-----------+-----+---------------+
+ 3 | stu_id | name      | age | register_date |
+ 4 +--------+-----------+-----+---------------+
+ 5 |      1 | zhangsan  |  22 | 2016-10-26    |
+ 6 |      2 | zhangsan1 |  23 | 2016-10-27    |
+ 7 |      3 | zhangsan2 |  24 | 2016-10-28    |
+ 8 |      5 | zhangsan3 |  25 | 2016-10-29    |
+ 9 |      6 | ZHANGSAN4 |  26 | 2016-10-30    |
+10 +--------+-----------+-----+---------------+
+11 5 rows in set (0.00 sec)
+12 
+13 mysql> select age from student order by age DESC;
+14 +-----+
+15 | age |
+16 +-----+
+17 |  26 |
+18 |  25 |
+19 |  24 |
+20 |  23 |
+21 |  22 |
+22 +-----+
+23 5 rows in set (0.00 sec)
+24 
+25 mysql> select age from student order by age asc;
+26 +-----+
+27 | age |
+28 +-----+
+29 |  22 |
+30 |  23 |
+31 |  24 |
+32 |  25 |
+33 |  26 |
+34 +-----+
+35 5 rows in set (0.00 sec)
+复制代码
+ 
+
+MySQL GROUP BY 语句　　
+
+1 SELECT column_name, function(column_name)
+2 FROM table_name
+3 WHERE column_name operator value
+4 GROUP BY column_name;
+例如：
+
+复制代码
+mysql> select * from student;
++--------+-----------+-----+---------------+
+| stu_id | name      | age | register_date |
++--------+-----------+-----+---------------+
+|      1 | zhangsan  |  22 | 2016-10-26    |
+|      2 | zhangsan1 |  23 | 2016-10-27    |
+|      3 | zhangsan2 |  24 | 2016-10-28    |
+|      5 | zhangsan3 |  25 | 2016-10-29    |
+|      6 | ZHANGSAN4 |  26 | 2016-10-30    |
+|      7 | zhangsan2 |  24 | 2016-10-25    |
++--------+-----------+-----+---------------+
+6 rows in set (0.00 sec)
+
+#接下来我们使用 GROUP BY 语句 将数据表按名字进行分组，并统计每个人有多少条记录：
+mysql> select name,count(*) from student group by name;
++-----------+----------+
+| name      | count(*) |
++-----------+----------+
+| zhangsan  |        1 |
+| zhangsan1 |        1 |
+| zhangsan2 |        2 |
+| zhangsan3 |        1 |
+| ZHANGSAN4 |        1 |
++-----------+----------+
+5 rows in set (0.00 sec)
+复制代码
+复制代码
+ 1 #使用 WITH ROLLUP
+   #我们模拟stu_id 就登陆数，统计一下总登录量
+
+ 2 mysql> select coalesce(name,"总数"), sum(stu_id) as singin_conut from student group by name with rollup;
+ 3 +-------------------------+--------------+
+ 4 | coalesce(name,"总数") | singin_conut |
+ 5 +-------------------------+--------------+
+ 6 | zhangsan                |            1 |
+ 7 | zhangsan1               |            2 |
+ 8 | zhangsan2               |           10 |
+ 9 | zhangsan3               |            5 |
+10 | ZHANGSAN4               |            6 |
+11 | 总数                  |           24 |
+12 +-------------------------+--------------+
+13 6 rows in set (0.00 sec)
+14 
+15 其中记录 NULL 表示所有人的登录次数。<br>
+16 我们可以使用 coalesce 来设置一个可以取代 NUll 的名称，coalesce 语法：
+17 mysql> select coalesce(name,"总数"), sum(stu_id) as singin_conut from student group by name with rollup;
+复制代码
+ 
+
+MySQL ALTER命令 
+
+我们需要修改数据表名或者修改数据表字段时，就需要使用到MySQL ALTER命令。
+
+删除，添加或修改表字段
+
+删除字段：
+
+复制代码
+ 1 mysql> alter table student drop register_date;
+ 2 Query OK, 6 rows affected (0.01 sec)
+ 3 Records: 6  Duplicates: 0  Warnings: 0
+ 4 
+ 5 mysql> select * from student;
+ 6 +--------+-----------+-----+
+ 7 | stu_id | name      | age |
+ 8 +--------+-----------+-----+
+ 9 |      1 | zhangsan  |  22 |
+10 |      2 | zhangsan1 |  23 |
+11 |      3 | zhangsan2 |  24 |
+12 |      5 | zhangsan3 |  25 |
+13 |      6 | ZHANGSAN4 |  26 |
+14 |      7 | zhangsan2 |  24 |
+15 +--------+-----------+-----+
+16 6 rows in set (0.00 sec)
+复制代码
+ 
+
+添加字段：
+
+复制代码
+ 1 mysql> alter table student add singin int(32) not null;
+ 2 Query OK, 6 rows affected (0.01 sec)
+ 3 Records: 6  Duplicates: 0  Warnings: 0
+ 4 
+ 5 mysql> select * from student;
+ 6 +--------+-----------+-----+--------+
+ 7 | stu_id | name      | age | singin |
+ 8 +--------+-----------+-----+--------+
+ 9 |      1 | zhangsan  |  22 |      0 |
+10 |      2 | zhangsan1 |  23 |      0 |
+11 |      3 | zhangsan2 |  24 |      0 |
+12 |      5 | zhangsan3 |  25 |      0 |
+13 |      6 | ZHANGSAN4 |  26 |      0 |
+14 |      7 | zhangsan2 |  24 |      0 |
+15 +--------+-----------+-----+--------+
+16 6 rows in set (0.00 sec)
+复制代码
+修改字段类型及名称
+
+如果需要修改字段类型及名称, 你可以在ALTER命令中使用 MODIFY 或 CHANGE 子句 。
+
+例如，把字段 c 的类型从 CHAR(1) 改为 CHAR(10)，可以执行以下命令:
+
+ 
+
+1 mysql> ALTER TABLE testalter_tbl MODIFY c CHAR(10);
+使用 CHANGE 子句, 语法有很大的不同。 在 CHANGE 关键字之后，紧跟着的是你要修改的字段名，然后指定新字段名及类型。尝试如下实例：
+
+1 mysql> ALTER TABLE testalter_tbl CHANGE i j BIGINT;
+3 mysql> ALTER TABLE testalter_tbl CHANGE j j INT;
+ALTER TABLE 对 Null 值和默认值的影响
+
+当你修改字段时，你可以指定是否包含只或者是否设置默认值。
+
+以下实例，指定字段 j 为 NOT NULL 且默认值为100 。
+
+1 mysql> ALTER TABLE testalter_tbl
+2     -> MODIFY j BIGINT NOT NULL DEFAULT 100;
+修改表名
+
+1 mysql> ALTER TABLE testalter_tbl RENAME TO alter_tbl;
+关于外键
+
+外键，一个特殊的索引，用于关键2个表，只能是指定内容　
+
+复制代码
+ 1 mysql> create table class(
+ 2     -> id  int not null primary key,
+ 3     -> name char(16));
+ 4 Query OK, 0 rows affected (0.02 sec)
+ 5  
+ 6  
+ 7 CREATE TABLE `student2` (
+ 8   `id` int(11) NOT NULL,
+ 9   `name` char(16) NOT NULL,
+10   `class_id` int(11) NOT NULL,
+11   PRIMARY KEY (`id`),
+12   KEY `fk_class_key` (`class_id`),
+13   CONSTRAINT `fk_class_key` FOREIGN KEY (`class_id`) REFERENCES `class` (`id`)
+14 )
+31 此时如果class 表中不存在id 1,student表也插入不了，这就叫外键约束
+32 mysql> insert into student2(id,name,class_id) values(1,'alex', 1);
+33 ERROR 1452 (23000): Cannot add or update a child row: a foreign key constraint fails (`testdb`.`student2`, CONSTRAINT `fk_class_key` FOREIGN KEY (`class_id`) REFERENCES `class` (`id`))
+34  
+35  
+36  
+37 mysql> insert into class(id,name) values(1,"linux");
+38 Query OK, 1 row affected (0.01 sec)
+39  
+40 mysql> insert into student2(id,name,class_id) values(1,'alex', 1);
+41 Query OK, 1 row affected (0.00 sec)
+42  
+43  
+44 ＃如果有student表中跟这个class表有关联的数据，你是不能删除class表中与其关联的纪录的
+45 mysql> delete from class where id =1;
+46 ERROR 1451 (23000): Cannot delete or update a parent row: a foreign key constraint fails (`testdb`.`student2`, CONSTRAINT `fk_class_key` FOREIGN KEY (`class_id`) REFERENCES `class` (`id`))
+复制代码
+ 
+
+ 
+
+MySQL NULL 值处理　　
+
+我们已经知道MySQL使用 SQL SELECT 命令及 WHERE 子句来读取数据表中的数据,但是当提供的查询条件字段为 NULL 时，该命令可能就无法正常工作。
+为了处理这种情况，MySQL提供了三大运算符:
+IS NULL: 当列的值是NULL,此运算符返回true。
+IS NOT NULL: 当列的值不为NULL, 运算符返回true。
+<=>: 比较操作符（不同于=运算符），当比较的的两个值为NULL时返回true。
+关于 NULL 的条件比较运算是比较特殊的。你不能使用 = NULL 或 != NULL 在列中查找 NULL 值 。
+在MySQL中，NULL值与任何其它值的比较（即使是NULL）永远返回false，即 NULL = NULL 返回false 。
+MySQL中处理NULL使用IS NULL和IS NOT NULL运算符。
+
+ 
+
+Mysql 连接（left join, right join, inner join ,full join）
+
+我们已经学会了如果在一张表中读取数据，这是相对简单的，但是在真正的应用中经常需要从多个数据表中读取数据。
+
+本章节我们将向大家介绍如何使用 MySQL 的 JOIN 在两个或多个表中查询数据。
+
+你可以在SELECT, UPDATE 和 DELETE 语句中使用 Mysql 的 JOIN 来联合多表查询。
+
+JOIN 按照功能大致分为如下三类：
+
+INNER JOIN（内连接,或等值连接）：获取两个表中字段匹配关系的记录。
+LEFT JOIN（左连接）：获取左表所有记录，即使右表没有对应匹配的记录。
+RIGHT JOIN（右连接）： 与 LEFT JOIN 相反，用于获取右表所有记录，即使左表没有对应匹配的记录。
+Inner join（交集）：
+
+复制代码
+#交集
+mysql> select * from A inner join B on A.id = B.id;
++----+----+
+| id | id |
++----+----+
+|  3 |  3 |
+|  4 |  4 |
++----+----+
+2 rows in set (0.00 sec)
+复制代码
+ 
+
+LEFT JOIN（差集）
+
+复制代码
+ 1 mysql> select * from A  left join B on A.id = B.id;
+ 2 +----+------+
+ 3 | id | id   |
+ 4 +----+------+
+ 5 |  1 | NULL |
+ 6 |  2 | NULL |
+ 7 |  3 |    3 |
+ 8 |  4 |    4 |
+ 9 +----+------+
+10 4 rows in set (0.00 sec)
+11 
+12 mysql> select * from B  left join A on B.id = A.id;
+13 +----+------+
+14 | id | id   |
+15 +----+------+
+16 |  3 |    3 |
+17 |  4 |    4 |
+18 |  5 | NULL |
+19 |  6 | NULL |
+20 |  7 | NULL |
+21 |  8 | NULL |
+22 +----+------+
+23 6 rows in set (0.00 sec)
+复制代码
+ 
+
+Right join(其实就是left join相反)
+
+复制代码
+ 1 mysql> select * from A right join B on A.id = B.id;
+ 2 +------+----+
+ 3 | id   | id |
+ 4 +------+----+
+ 5 |    3 |  3 |
+ 6 |    4 |  4 |
+ 7 | NULL |  5 |
+ 8 | NULL |  6 |
+ 9 | NULL |  7 |
+10 | NULL |  8 |
+11 +------+----+
+12 6 rows in set (0.00 sec)
+复制代码
+ 
+
+Full join（并集）
+
+mysql 并不直接支持full join,but 总是难不到我们
+
+复制代码
+ 1 mysql> select * from A left join B on A.id = B.id union select * from A right join B on A.id = B.id;
+ 2 +------+------+
+ 3 | id   | id   |
+ 4 +------+------+
+ 5 |    1 | NULL |
+ 6 |    2 | NULL |
+ 7 |    3 |    3 |
+ 8 |    4 |    4 |
+ 9 | NULL |    5 |
+10 | NULL |    6 |
+11 | NULL |    7 |
+12 | NULL |    8 |
+13 +------+------+
+14 8 rows in set (0.00 sec)
+复制代码
+ 
+
+5、事务
+
+MySQL 事务主要用于处理操作量大，复杂度高的数据。比如说，在人员管理系统中，你删除一个人员，你即需要删除人员的基本资料，也要删除和该人员相关的信息，如信箱，文章等等，这样，这些数据库操作语句就构成一个事务！
+
+在MySQL中只有使用了Innodb数据库引擎的数据库或表才支持事务
+事务处理可以用来维护数据库的完整性，保证成批的SQL语句要么全部执行，要么全部不执行
+事务用来管理insert,update,delete语句
+一般来说，事务是必须满足4个条件（ACID）： Atomicity（原子性）、Consistency（稳定性）、Isolation（隔离性）、Durability（可靠性）
+
+1、事务的原子性：一组事务，要么成功；要么撤回。
+2、稳定性 ： 有非法数据（外键约束之类），事务撤回。
+3、隔离性：事务独立运行。一个事务处理后的结果，影响了其他事务，那么其他事务会撤回。事务的100%隔离，需要牺牲速度。
+4、可靠性：软、硬件崩溃后，InnoDB数据表驱动会利用日志文件重构修改。可靠性和高速度不可兼得， innodb_flush_log_at_trx_commit选项 决定什么时候吧事务保存到日志里。
+重要：
+
+我们知道mysql的引擎分为ISAM，MyIASM(ISAM的升级版)，InnoDB。
+
+1/ISAM 
+
+ISAM是一个定义明确且历经时间考验的数据表格管理方法，它在设计之时就考虑到数据库被查询的次数要远大于更新的次数。因此，ISAM执行读取操作的速度很快，而且不占用大量的内存和存储资源。ISAM的两个主要不足之处在于，它不支持事务处理，也不能够容错：如果你的硬盘崩溃了，那么数据文件就无法恢复了。如果你正在把ISAM用在关键任务应用程序里，那就必须经常备份你所有的实时数据，通过其复制特性，MySQL能够支持这样的备份应用程序。 
+
+2/InnoDB 
+
+它提供了事务控制能力功能，它确保一组命令全部执行成功，或者当任何一个命令出现错误时所有命令的结果都被回退，可以想像在电子银行中事务控制能力是非常重要的。支持COMMIT、ROLLBACK和其他事务特性。最新版本的Mysql已经计划移除对BDB的支持，转而全力发展InnoDB。 
+
+MyIASM是IASM表的新版本，有如下扩展： 
+二进制层次的可移植性。 
+NULL列索引。 
+对变长行比ISAM表有更少的碎片。 
+支持大文件。 
+更好的索引压缩。 
+更好的键吗统计分布。 
+更好和更快的auto_increment处理。 
+
+以下是一些细节和具体实现的差别：
+
+1.InnoDB不支持FULLTEXT类型的索引。
+2.InnoDB中不保存表的 
+具体行数，也就是说，执行select count(*) from 
+table时，InnoDB要扫描一遍整个表来计算有多少行，但是MyISAM只要简单的读出保存好的行数即可。注意的是，当count(*)语句包含 
+where条件时，两种表的操作是一样的。
+3.对于AUTO_INCREMENT类型的字段，InnoDB中必须包含只有该字段的索引，但是在MyISAM表中，可以和其他字段一起建立联合索引。
+4.DELETE 
+FROM table时，InnoDB不会重新建立表，而是一行一行的删除。
+5.LOAD TABLE FROM 
+MASTER操作对InnoDB是不起作用的，解决方法是首先把InnoDB表改成MyISAM表，导入数据后再改成InnoDB表，但是对于使用的额外的InnoDB特性（例如外键）的表不适用。
+
+另外，InnoDB表的行锁也不是绝对的，如果在执行一个SQL语句时MySQL不能确定要扫描的范围，InnoDB表同样会锁全表，例如update 
+table set num=1 where name like “�a%”
+
+任何一种表都不是万能的，只用恰当的针对业务类型来选择合适的表类型，才能最大的发挥MySQL的性能优势.
+
+MySQL 
+Administrator建数据库的时候，表缺省是InnoDB类型。
+
+InnoDB，MyISAM 
+两种类型有什么区别：MyISAM类型不支持事务处理等高级处理，而InnoDB类型支持。 
+MyISAM类型的表强调的是性能，其执行数度比InnoDB类型更快，但是不提供事务支持，而InnoDB提供事务支持，外键等高级数据库功能。
+
+MyISAM类型的二进制数据文件可以在不同操作系统中迁移。也就是可以直接从Windows系统拷贝到linux系统中使用。
+
+ 
+
+ 
+
+1 查看系统支持的存储引擎
+
+ 
+
+show engines;
+
+ 
+
+2 查看表使用的存储引擎
+
+ 
+
+两种方法：
+
+ 
+
+a、show table status from db_name where name='table_name';
+
+ 
+
+b、show create table table_name;
+
+ 
+
+如果显示的格式不好看，可以用\g代替行尾分号
+
+ 
+
+有人说用第二种方法不准确，我试了下，关闭掉原先默认的Innodb引擎后根本无法执行show create table table_name指令，因为之前建的是Innodb表，关掉后默认用MyISAM引擎，导致Innodb表数据无法被正确读取。
+
+ 
+
+3 修改表引擎方法
+
+ 
+
+alter table table_name engine=innodb;
+
+ 
+
+4 关闭Innodb引擎方法
+
+ 
+
+关闭mysql服务： net stop mysql
+
+ 
+
+找到mysql安装目录下的my.ini文件：
+
+ 
+
+找到default-storage-engine=INNODB 改为default-storage-engine=MYISAM
+
+ 
+
+找到#skip-innodb 改为skip-innodb
+
+ 
+
+启动mysql服务：net start mysql
+
+ 
+
+复制代码
+ 1 mysql> show create table C;
+ 2 +-------+-----------------------------------------------------------------------------------------------------+
+ 3 | Table | Create Table                                                                                        |
+ 4 +-------+-----------------------------------------------------------------------------------------------------+
+ 5 | C     | CREATE TABLE `C` (
+ 6   `a` int(11) NOT NULL,
+ 7   PRIMARY KEY (`a`)
+ 8 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 |
+ 9 +-------+-----------------------------------------------------------------------------------------------------+
+10 1 row in set (0.00 sec)
+11 
+12 mysql> begin;
+13 Query OK, 0 rows affected (0.00 sec)
+14 
+15 mysql> insert into C(a)values(1);
+16 Query OK, 1 row affected (0.00 sec)
+17 
+18 mysql> select * from C;
+19 +---+
+20 | a |
+21 +---+
+22 | 1 |
+23 +---+
+24 1 row in set (0.00 sec)
+25 
+26 mysql> rollback;
+27 Query OK, 0 rows affected (0.00 sec)
+28 
+29 mysql> select * from C;
+30 Empty set (0.00 sec)
+31 
+32 mysql>
+复制代码
+注意： 如果开始一个事务的时候，直接commit;了就已经提交了，如果再想rollback就回不去了。
+
+ 
+
+6、索引
+
+MySQL索引的建立对于MySQL的高效运行是很重要的，索引可以大大提高MySQL的检索速度。
+
+打个比方，如果合理的设计且使用索引的MySQL是一辆兰博基尼的话，那么没有设计和使用索引的MySQL就是一个人力三轮车。
+
+索引分单列索引和组合索引。单列索引，即一个索引只包含单个列，一个表可以有多个单列索引，但这不是组合索引。组合索引，即一个索包含多个列。
+
+创建索引时，你需要确保该索引是应用在 SQL 查询语句的条件(一般作为 WHERE 子句的条件)。 
+
+实际上，索引也是一张表，该表保存了主键与索引字段，并指向实体表的记录。
+
+上面都在说使用索引的好处，但过多的使用索引将会造成滥用。因此索引也会有它的缺点：虽然索引大大提高了查询速度，同时却会降低更新表的速度，如对表进行INSERT、UPDATE和DELETE。因为更新表时，MySQL不仅要保存数据，还要保存一下索引文件。建立索引会占用磁盘空间的索引文件。
+
+普通索引
+
+创建索引
+
+这是最基本的索引，它没有任何限制。它有以下几种创建方式：
+
+1 CREATE INDEX indexName ON mytable(username(length));  
+如果是CHAR，VARCHAR类型，length可以小于字段实际长度；如果是BLOB和TEXT类型，必须指定 length。
+
+ 修改表结构
+
+1 ALTER mytable ADD INDEX [indexName] ON (username(length))
+创建表的时候直接指定
+
+复制代码
+1 CREATE TABLE mytable( 
+2   
+3 ID INT NOT NULL,  
+4   
+5 username VARCHAR(16) NOT NULL, 
+6   
+7 INDEX [indexName] (username(length)) 
+8   
+9 ); 
+复制代码
+删除索引的语法
+
+1 DROP INDEX [indexName] ON mytable;
+唯一索引
+
+它与前面的普通索引类似，不同的就是：索引列的值必须唯一，但允许有空值。如果是组合索引，则列值的组合必须唯一。它有以下几种创建方式：
+
+创建索引
+
+ View Code
+使用ALTER 命令添加和删除索引
+
+ View Code
+使用 ALTER 命令添加和删除主键
+
+ View Code
+显示索引信息
+
+1 SHOW INDEX FROM table_name\G
+ mysql练习题 http://www.cnblogs.com/wupeiqi/articles/5729934.html 
+
+ 
+
+更多mysql知识，请看http://www.cnblogs.com/wupeiqi/articles/5713323.html
+
+ 
+
+7、python 操作mysql 
+
+pymsql是Python中操作MySQL的模块，其使用方法和MySQLdb几乎相同。
+
+安装
+
+1 easy_install pymysql
+使用操作
+
+1、执行SQL
+
+复制代码
+ 1 import pymysql
+ 2   
+ 3 # 创建连接
+ 4 conn = pymysql.connect(host='127.0.0.1', port=3306, user='root', passwd='123', db='t1')
+ 5 # 创建游标
+ 6 cursor = conn.cursor()
+ 7   
+ 8 # 执行SQL，并返回收影响行数
+ 9 effect_row = cursor.execute("update hosts set host = '1.1.1.2'")
+10   
+11 # 执行SQL，并返回受影响行数
+12 #effect_row = cursor.execute("update hosts set host = '1.1.1.2' where nid > %s", (1,))
+13   
+14 # 执行SQL，并返回受影响行数
+15 #effect_row = cursor.executemany("insert into hosts(host,color_id)values(%s,%s)", [("1.1.1.11",1),("1.1.1.11",2)])
+16   
+17   
+18 # 提交，不然无法保存新建或者修改的数据
+19 conn.commit()
+20   
+21 # 关闭游标
+22 cursor.close()
+23 # 关闭连接
+24 conn.close()
+复制代码
+ 
+
+具体操作
+
+复制代码
+ 1 import pymysql
+ 2 
+ 3 # 创建连接（相当于创建了一个socket连接）
+ 4 conn = pymysql.connect(host='172.16.5.237', port=3306, user='root', passwd='12345678', db='oldboy')
+ 5 
+ 6 # 创建游标#实时上我们的是cursor来取数据
+ 7 cursor = conn.cursor()
+ 8 
+ 9 # 执行SQL，并返回收影响行数
+10 effect_row = cursor.execute("select * from A;")
+11 # print(effect_row)#显示表中有几行
+12 # print(cursor.fetchone())#取一行
+13 # print(cursor.fetchall())#打印表中的所有数据
+14 
+15 # 执行SQL，并返回受影响行数
+16 #effect_row = cursor.execute("update hosts set host = '1.1.1.2' where nid > %s", (1,))
+17 
+18 # 执行SQL，并返回受影响行数
+19 #effect_row = cursor.executemany("insert into hosts(host,color_id)values(%s,%s)", [("1.1.1.11",1),("1.1.1.11",2)])
+20 
+21 #批量插入
+22 # data = [
+23 #     (22),
+24 #     (33),
+25 #     (44)
+26 # ]
+27 # effect_row = cursor.executemany("insert into A(id) values(%s)",data)#批量写入
+28 
+29 # 提交，不然无法保存新建或者修改的数据
+30 conn.commit()#默认就客气了事务，所以这里不提交数据库就没有数据
+31 
+32 # 关闭游标
+33 cursor.close()
+34 # 关闭连接
+35 conn.close()
+复制代码
+ 
+
+2、获取新创建数据自增ID
+
+复制代码
+ 1 #!/usr/bin/env python
+ 2 # -*- coding:utf-8 -*-
+ 3 import pymysql
+ 4   
+ 5 conn = pymysql.connect(host='127.0.0.1', port=3306, user='root', passwd='123', db='t1')
+ 6 cursor = conn.cursor()
+ 7 cursor.executemany("insert into hosts(host,color_id)values(%s,%s)", [("1.1.1.11",1),("1.1.1.11",2)])
+ 8 conn.commit()
+ 9 cursor.close()
+10 conn.close()
+11   
+12 # 获取最新自增ID
+13 new_id = cursor.lastrowid
+复制代码
+3、获取查询数据
+
+复制代码
+ 1 #!/usr/bin/env python
+ 2 # -*- coding:utf-8 -*-
+ 3 import pymysql
+ 4   
+ 5 conn = pymysql.connect(host='127.0.0.1', port=3306, user='root', passwd='123', db='t1')
+ 6 cursor = conn.cursor()
+ 7 cursor.execute("select * from hosts")
+ 8   
+ 9 # 获取第一行数据
+10 row_1 = cursor.fetchone()
+11   
+12 # 获取前n行数据
+13 # row_2 = cursor.fetchmany(3)
+14 # 获取所有数据
+15 # row_3 = cursor.fetchall()
+16   
+17 conn.commit()
+18 cursor.close()
+19 conn.close()
+复制代码
+ 
+
+注：在fetch数据时按照顺序进行，可以使用cursor.scroll(num,mode)来移动游标位置，如：
+
+cursor.scroll(1,mode='relative')  # 相对当前位置移动
+cursor.scroll(2,mode='absolute') # 相对绝对位置移动
+4、fetch数据类型
+
+　　关于默认获取的数据是元祖类型，如果想要或者字典类型的数据，即：
+
+复制代码
+ 1 import pymysql
+ 2   
+ 3 conn = pymysql.connect(host='127.0.0.1', port=3306, user='root', passwd='123', db='t1')
+ 4   
+ 5 # 游标设置为字典类型
+ 6 cursor = conn.cursor(cursor=pymysql.cursors.DictCursor)
+ 7 r = cursor.execute("call p1()")
+ 8   
+ 9 result = cursor.fetchone()
+10   
+11 conn.commit()
+12 cursor.close()
+13 conn.close()
+复制代码
+8、ORM sqlachemy学习
+
+ORM介绍
+sqlalchemy安装
+sqlalchemy基本使用
+多外键关联
+多对多关系
+ 
+
+一、ORM介绍
+
+orm英文全称object relational mapping,就是对象映射关系程序，简单来说我们类似python这种面向对象的程序来说一切皆对象，但是我们使用的数据库却都是关系型的，为了保证一致的使用习惯，通过orm将编程语言的对象模型和数据库的关系模型建立映射关系，这样我们在使用编程语言对数据库进行操作的时候可以直接使用编程语言的对象模型进行操作就可以了，而不用直接使用sql语言。
+
+
+
+orm的优点：
+
+隐藏了数据访问细节，“封闭”的通用数据库交互，ORM的核心。他使得我们的通用数据库交互变得简单易行，并且完全不用考虑该死的SQL语句。快速开发，由此而来。
+ORM使我们构造固化数据结构变得简单易行。
+缺点：
+
+无可避免的，自动化意味着映射和关联管理，代价是牺牲性能（早期，这是所有不喜欢ORM人的共同点）。现在的各种ORM框架都在尝试使用各种方法来减轻这块（LazyLoad，Cache），效果还是很显著的。
+ 
+
+二、sqlalchemy安装
+
+ 
+
+在Python中，最有名的ORM框架是SQLAlchemy。用户包括openstack＼Dropbox等知名公司或应用，主要用户列表http://www.sqlalchemy.org/organizations.html#openstack
+
+
+
+ 
+
+Dialect用于和数据API进行交流，根据配置文件的不同调用不同的数据库API，从而实现对数据库的操作，如：
+
+
+复制代码
+ 1 MySQL-Python
+ 2     mysql+mysqldb://<user>:<password>@<host>[:<port>]/<dbname>
+ 3    
+ 4 pymysql
+ 5     mysql+pymysql://<username>:<password>@<host>/<dbname>[?<options>]
+ 6    
+ 7 MySQL-Connector
+ 8     mysql+mysqlconnector://<user>:<password>@<host>[:<port>]/<dbname>
+ 9    
+10 cx_Oracle
+11     oracle+cx_oracle://user:pass@host:port/dbname[?key=value&key=value...]
+12    
+13 更多详见：http://docs.sqlalchemy.org/en/latest/dialects/index.html
+复制代码
+ 
+
+安装sqlalchemy
+
+1 easy_install sqlalchemy
+ 
+
+三、sqlalchemy基本使用
+
+简单的新建用法（新建一个表）
+
+复制代码
+ 1 import sqlalchemy
+ 2 from sqlalchemy import create_engine
+ 3 from sqlalchemy.ext.declarative import declarative_base
+ 4 from sqlalchemy import Column, Integer, String
+ 5 
+ 6 engine = create_engine("mysql+pymysql://root:12345678@172.16.5.237/oldboy",
+ 7                                     encoding='utf-8', echo=True)
+ 8 
+ 9 
+10 Base = declarative_base() #生成orm基类
+11 
+12 class User(Base):
+13     __tablename__ = 'user' #表名
+14     id = Column(Integer, primary_key=True)
+15     name = Column(String(32))
+16     password = Column(String(64))
+17 
+18 Base.metadata.create_all(engine) #创建表结构
+复制代码
+另外一种写法（不常用）
+
+
+复制代码
+ 1 from sqlalchemy import Table, MetaData, Column, Integer, String, ForeignKey
+ 2 from sqlalchemy.orm import mapper
+ 3  
+ 4 metadata = MetaData()
+ 5  
+ 6 user = Table('user', metadata,
+ 7             Column('id', Integer, primary_key=True),
+ 8             Column('name', String(50)),
+ 9             Column('fullname', String(50)),
+10             Column('password', String(12))
+11         )
+12  
+13 class User(object):
+14     def __init__(self, name, fullname, password):
+15         self.name = name
+16         self.fullname = fullname
+17         self.password = password
+18  
+19 mapper(User, user) #the table metadata is created separately with the Table construct, then associated with the User class via the mapper() function
+复制代码
+ 
+
+现在开始插入一条数据：
+
+复制代码
+ 1 import sqlalchemy
+ 2 from sqlalchemy import create_engine
+ 3 from sqlalchemy.ext.declarative import declarative_base
+ 4 from sqlalchemy import Column, Integer, String
+ 5 from sqlalchemy.orm import sessionmaker
+ 6 
+ 7 engine = create_engine("mysql+pymysql://root:12345678@172.16.5.237/oldboy",
+ 8                                     encoding='utf-8', echo=True)
+ 9 
+10 
+11 Base = declarative_base() #生成orm基类
+12 
+13 class User(Base):
+14     __tablename__ = 'user' #表名
+15     id = Column(Integer, primary_key=True)
+16     name = Column(String(32))
+17     password = Column(String(64))
+18 
+19 Session_class = sessionmaker(bind=engine) #创建与数据库的会话session class ,注意,这里返回给session的是个class,不是实例
+20 Session = Session_class() #生成session实例
+21 
+22 
+23 user_obj = User(name="zhangsan",password="12345678") #生成你要创建的数据对象
+24 print(user_obj.name,user_obj.id)  #此时还没创建对象呢，不信你打印一下id发现还是None
+25 
+26 Session.add(user_obj) #把要创建的数据对象添加到这个session里， 一会统一创建
+27 print(user_obj.name,user_obj.id) #此时也依然还没创建
+28 
+29 Session.commit() #现此才统一提交，创建数据
+30 
+31 
+32 Base.metadata.create_all(engine) #创建表结构
+复制代码
+注意上面导入了一个模块sessionmaker
+
+ 
+
+查询：
+
+复制代码
+ 1 import sqlalchemy
+ 2 from sqlalchemy import create_engine
+ 3 from sqlalchemy.ext.declarative import declarative_base
+ 4 from sqlalchemy import Column, Integer, String
+ 5 from sqlalchemy.orm import sessionmaker
+ 6 
+ 7 engine = create_engine("mysql+pymysql://root:12345678@172.16.5.237/oldboy",
+ 8                                     encoding='utf-8')#echo=True这里去掉这里
+ 9 
+10 
+11 Base = declarative_base() #生成orm基类
+12 
+13 class User(Base):
+14     __tablename__ = 'user' #表名
+15     id = Column(Integer, primary_key=True)
+16     name = Column(String(32))
+17     password = Column(String(64))
+18 
+19 Session_class = sessionmaker(bind=engine) #创建与数据库的会话session class ,注意,这里返回给session的是个class,不是实例
+20 Session = Session_class() #生成session实例
+21 
+22 data = Session.query(User).filter_by(name="zhangsan").all()#.all数所有
+23 print(data[0].name,data[0].password)#因为这里取出的是一个列表，所以就得这么取
+24 
+25 Session.commit() #现此才统一提交，创建数据
+26 
+27 
+28 Base.metadata.create_all(engine) #创建表结构
+复制代码
+上面这个太二了，来个高大上点的
+
+
+复制代码
+ 1 import sqlalchemy
+ 2 from sqlalchemy import create_engine
+ 3 from sqlalchemy.ext.declarative import declarative_base
+ 4 from sqlalchemy import Column, Integer, String
+ 5 from sqlalchemy.orm import sessionmaker
+ 6 
+ 7 engine = create_engine("mysql+pymysql://root:12345678@172.16.5.237/oldboy",
+ 8                                     encoding='utf-8')#echo=True这里去掉这里
+ 9 
+10 
+11 Base = declarative_base() #生成orm基类
+12 
+13 
+14 class User(Base):
+15     __tablename__ = 'user' #表名
+16     id = Column(Integer, primary_key=True)
+17     name = Column(String(32))
+18     password = Column(String(64))
+19 
+20     def __repr__(self):
+21         return "<name=%s,password=%s)>" % (self.name,self.password)
+22 
+23 Session_class = sessionmaker(bind=engine) #创建与数据库的会话session class ,注意,这里返回给session的是个class,不是实例
+24 Session = Session_class() #生成session实例
+25 
+26 data = Session.query(User).filter_by(name="zhangsan").all()#.all()数所有
+27 print(data)#
+28 
+29 Session.commit() #现此才统一提交，创建数据
+30 
+31 
+32 Base.metadata.create_all(engine) #创建表结构
+复制代码
+ 
+
+修改：
+
+
+复制代码
+ 1 import sqlalchemy
+ 2 from sqlalchemy import create_engine
+ 3 from sqlalchemy.ext.declarative import declarative_base
+ 4 from sqlalchemy import Column, Integer, String
+ 5 from sqlalchemy.orm import sessionmaker
+ 6 
+ 7 engine = create_engine("mysql+pymysql://root:12345678@172.16.5.237/oldboy",
+ 8                                     encoding='utf-8')#echo=True这里去掉这里
+ 9 
+10 
+11 Base = declarative_base() #生成orm基类
+12 
+13 
+14 class User(Base):
+15     __tablename__ = 'user' #表名
+16     id = Column(Integer, primary_key=True)
+17     name = Column(String(32))
+18     password = Column(String(64))
+19 
+20     def __repr__(self):
+21         return "<name=%s,password=%s)>" % (self.name,self.password)
+22 
+23 Session_class = sessionmaker(bind=engine) #创建与数据库的会话session class ,注意,这里返回给session的是个class,不是实例
+24 Session = Session_class() #生成session实例
+25 
+26 data = Session.query(User).filter_by(name="zhangsan").first()#.all()数所有
+27 data.name = "lisi"
+28 print(data)#
+29 
+30 Session.commit() #现此才统一提交，创建数据
+31 
+32 
+33 Base.metadata.create_all(engine) #创建表结构
+复制代码
+ 
+
+回滚：
+
+
+复制代码
+ 1 import sqlalchemy
+ 2 from sqlalchemy import create_engine
+ 3 from sqlalchemy.ext.declarative import declarative_base
+ 4 from sqlalchemy import Column, Integer, String
+ 5 from sqlalchemy.orm import sessionmaker
+ 6 
+ 7 engine = create_engine("mysql+pymysql://root:12345678@172.16.5.237/oldboy",
+ 8                                     encoding='utf-8')#echo=True这里去掉这里
+ 9 
+10 
+11 Base = declarative_base() #生成orm基类
+12 
+13 
+14 class User(Base):
+15     __tablename__ = 'user' #表名
+16     id = Column(Integer, primary_key=True)
+17     name = Column(String(32))
+18     password = Column(String(64))
+19 
+20     def __repr__(self):
+21         return "<name=%s,password=%s)>" % (self.name,self.password)
+22 
+23 Session_class = sessionmaker(bind=engine) #创建与数据库的会话session class ,注意,这里返回给session的是个class,不是实例
+24 Session = Session_class() #生成session实例
+25 
+26 fake_user = User(name="hehe",password='12345678')
+27 Session.add(fake_user)
+28 
+29 print(Session.query(User).filter(User.name.in_(['hehe'])).all() )  #这时看session里有你刚添加和修改的数据
+30 
+31 Session.rollback()#回滚一下
+32 print("rollback后")
+33 
+34 print(Session.query(User).filter(User.name.in_(['hehe'])).all() )#再看看有没有数据了
+35 
+36 
+37 # Session.commit() #现此才统一提交，创建数据
+38 # Base.metadata.create_all(engine) #创建表结构
+复制代码
+ 
+
+获取所有数据：
+
+1 print(Session.query(User.name,User.id).all() )
+ 
+
+多条件查询：
+
+1 objs = Session.query(User).filter(User.id>0).filter(User.id<7).all()
+ 
+
+统计和分组：
+
+1 Session.query(User).filter(User.name.like("Ra%")).count()
+ 
+
+分组
+
+1 from sqlalchemy import func
+2 print(Session.query(func.count(User.name),User.name).group_by(User.name).all() )
+ 
+
+1、外键关联
+
+
+复制代码
+ 1 __author__ = 'Administrator'
+ 2 
+ 3 import sqlalchemy
+ 4 from sqlalchemy import create_engine
+ 5 from sqlalchemy.ext.declarative import declarative_base
+ 6 from sqlalchemy import Column, Enum,Integer, String,DATE,ForeignKey
+ 7 from sqlalchemy.orm import sessionmaker,relationship
+ 8 
+ 9 engine = create_engine("mysql+pymysql://root:12345678@172.16.5.238/oldboydb",
+10                                     encoding='utf-8')#echo=True这里去掉这里
+11 Base = declarative_base() #生成orm基类
+12 
+13 class Student(Base):
+14     __tablename__ = "student"
+15     id = Column(Integer,primary_key=True)
+16     name = Column(String(32),nullable=False)
+17     register_date = Column(DATE,nullable=False)
+18 
+19     def __repr__(self):
+20         return "<%s name:%s>"%(self.id,self.name)
+21 
+22 class Study_record(Base):
+23     __tablename__ = "study_record"
+24     id = Column(Integer,primary_key=True)
+25     day = Column(Integer,nullable=False)
+26     status = Column(String(32),nullable=False)
+27     stu_id = Column(Integer,ForeignKey("student.id"))
+28 
+29     student = relationship("Student",backref="my_study_record")#这个是两个orm在内存中将两个建立表的类关联起来。
+30 
+31     def __repr__(self):
+32         return "<%s day:%s status:%s>"%(self.student.name,self.day,self.status)
+33 
+34 Base.metadata.create_all(engine)#创建表结构
+35 
+36 
+37 Session_class = sessionmaker(bind=engine) #创建与数据库的会话session class
+38 Session = Session_class() #生成session实例
+39 
+40 # s1 = Student(name="zhangsan1",register_date = "2016-10-21")#给student表中插入数据
+41 # s2 = Student(name="zhangsan2",register_date = "2016-10-22")
+42 # s3 = Student(name="zhangsan3",register_date = "2016-10-23")
+43 # s4 = Student(name="zhangsan4",register_date = "2016-10-24")
+44 #
+45 # study_obj1 = Study_record(day = 1,status="YES",stu_id = 1)给study_record表中插入数据
+46 # study_obj2 = Study_record(day = 2,status="NO",stu_id = 1)
+47 # study_obj3 = Study_record(day = 3,status="YES",stu_id = 1)
+48 # study_obj4 = Study_record(day = 4,status="YES",stu_id = 2)
+49 #
+50 # Session.add_all([s1,s2,s3,s4,study_obj1,study_obj2,study_obj3,study_obj4])
+51 
+52 # stu_obj = Session.query(Student).filter(Student.name=="zhangsan1").first()
+53 # print(stu_obj.my_study_record)#通过查询Student这个类查询外键zhangsan1的study_record表中的数据
+54 
+55 stu_obj = Session.query(Study_record).filter(Study_record.stu_id=="1").all()
+56 print(stu_obj)#使用study_record表中的的stu_id反查所有等于1的信息（这里就将两个表的数据统一查询出来了）
+57 
+58 
+59 Session.commit()
+复制代码
+ 
+
+2、多外键关联
+
+
+复制代码
+ 1 #需求：一个人的名字可能关联的是两个地址，或者更多。我们在customer表中存id和姓名。在address表中存地址
+ 2 
+ 3 from sqlalchemy import Integer, ForeignKey, String, Column
+ 4 from sqlalchemy.ext.declarative import declarative_base
+ 5 from sqlalchemy.orm import relationship
+ 6 from sqlalchemy import create_engine
+ 7 
+ 8 Base = declarative_base() #生成orm基类
+ 9 
+10 
+11 class Customer(Base):#创建表结构customer表
+12     __tablename__ = 'customer'
+13     id = Column(Integer, primary_key=True)
+14     name = Column(String(64))
+15 
+16     billing_address_id = Column(Integer, ForeignKey("address.id"))#下账单的地址
+17     shipping_address_id = Column(Integer, ForeignKey("address.id"))#收货的地址
+18 
+19     billing_address = relationship("Address", foreign_keys=[billing_address_id])
+20     shipping_address = relationship("Address", foreign_keys=[shipping_address_id])
+21 
+22 
+23 class Address(Base):#创建address表
+24     __tablename__ = 'address'
+25     id = Column(Integer, primary_key=True)
+26     street = Column(String(64))
+27     city = Column(String(64))
+28     state = Column(String(64))
+29 
+30 
+31     def __repr__(self):
+32         return self.street
+33 
+34 engine = create_engine("mysql+pymysql://root:12345678@172.16.5.238/oldboydb",
+35                        encoding='utf-8')
+36 
+37 # Base.metadata.create_all(engine)  # 创建表结构
+复制代码
+ 
+
+
+复制代码
+ 1 from day12.pymysql_SQLAlchemy import orm_many_fk
+ 2 from sqlalchemy.orm import sessionmaker
+ 3 
+ 4 Session_class = sessionmaker(bind=orm_many_fk.engine)  # 创建与数据库的会话session class ,注意,这里返回给session的是个class,不是实例
+ 5 session = Session_class()  # 生成session实例 #cursor
+ 6 #
+ 7 # addr1 = orm_many_fk.Address(street="Tiantongyuan", city="ChangPing", state="BJ")
+ 8 # addr2 = orm_many_fk.Address(street="Wudaokou", city="Haidian", state="BJ")
+ 9 # addr3 = orm_many_fk.Address(street="Yanjiao", city="LangFang", state="HB")
+10 #
+11 # session.add_all([addr1,addr2,addr3])
+12 # c1 =  orm_many_fk.Customer(name="Alex", billing_address= addr1,shipping_address=addr2)
+13 # c2 =  orm_many_fk.Customer(name="Jack", billing_address= addr3,shipping_address=addr3)
+14 #
+15 # session.add_all([c1,c2])
+16 
+17 obj = session.query(orm_many_fk.Customer).filter(orm_many_fk.Customer.name=="jack").first()
+18 print(obj.name,obj.billing_address,obj.shipping_address)
+19 
+20 session.commit()
+复制代码
+ 
+
+3、多对多关系
+
+现在来设计一个能描述“图书”与“作者”的关系的表结构，需求是
+
+一本书可以有好几个作者一起出版
+一个作者可以写好几本书
+
+复制代码
+ 1 from sqlalchemy import Table, Column, Integer,String,DATE, ForeignKey
+ 2 from sqlalchemy.orm import relationship
+ 3 from sqlalchemy.ext.declarative import declarative_base
+ 4 from sqlalchemy import create_engine
+ 5 from sqlalchemy.orm import sessionmaker
+ 6 
+ 7 
+ 8 Base = declarative_base()
+ 9 
+10 
+11 book_m2m_author = Table('book_m2m_author', Base.metadata,
+12                         Column('book_id',Integer,ForeignKey('books.id')),
+13                         Column('author_id',Integer,ForeignKey('authors.id')),
+14                         )
+15 
+16 class Book(Base):
+17     __tablename__ = 'books'
+18     id = Column(Integer,primary_key=True)
+19     name = Column(String(64))
+20     pub_date = Column(DATE)
+21     authors = relationship('Author',secondary=book_m2m_author,backref='books')
+22 
+23     def __repr__(self):
+24         return self.name
+25 
+26 class Author(Base):
+27     __tablename__ = 'authors'
+28     id = Column(Integer, primary_key=True)
+29     name = Column(String(32))
+30 
+31     def __repr__(self):
+32         return self.name
+33 
+34 engine = create_engine("mysql+pymysql://root:12345678@172.16.5.238/oldboydb?charset=utf8",
+35                        )
+36 
+37 Base.metadata.create_all(engine)  # 创建表结构
+复制代码
+
+复制代码
+ 1 from day12.pymysql_SQLAlchemy import orm_m2m
+ 2 from sqlalchemy.orm import sessionmaker
+ 3 
+ 4 Session_class = sessionmaker(bind=orm_m2m.engine)  # 创建与数据库的会话session class ,注意,这里返回给session的是个class,不是实例
+ 5 session = Session_class()  # 生成session实例 #cursor
+ 6 
+ 7 
+ 8 # b1 = orm_m2m.Book(name="learn python with Alex",pub_date="2014-05-2")
+ 9 # b2= orm_m2m.Book(name="learn Zhangbility with Alex",pub_date="2015-05-2")
+10 # b3 = orm_m2m.Book(name="跟Alex去泰国",pub_date="2016-05-2")
+11 
+12 # a1 = orm_m2m.Author(name="Alex")
+13 # a2 = orm_m2m.Author(name="Jack")
+14 # a3 = orm_m2m.Author(name="Rain")
+15 #
+16 # b1.authors = [a1,a3]
+17 # b3.authors = [a1,a2,a3]
+18 
+19 # session.add_all([b3,])
+20 
+21 author_obj = session.query(orm_m2m.Author).filter(orm_m2m.Author.name=="Alex").first()
+22 print(author_obj.books)
+23 # book_obj = session.query(orm_m2m.Book).filter(orm_m2m.Book.id==2).first()
+24 # book_obj.authors.remove(author_obj)
+25 # session.commit()
+复制代码
+转载地址： http://www.cnblogs.com/lei0213/p/6002921.html
+附另一篇文章：
+python（pymysql）之mysql简单操作
