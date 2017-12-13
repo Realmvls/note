@@ -1,0 +1,108 @@
+首先说明基本功能：
+
+dumps是将dict转化成str格式，loads是将str转化成dict格式。
+
+dump和load也是类似的功能，只是与文件操作结合起来了。
+
+ 
+
+看代码实例：
+
+	
+In [1]: import json
+ 
+In [2]: a = {'name': 'wang', 'age': 29}
+ 
+In [3]: b = json.dumps(a)
+ 
+In [4]: print b, type(b)
+{"age": 29, "name": "wang"} <type 'str'>
+ 
+In [11]: json.loads(b)
+Out[11]: {u'age': 29, u'name': u'wang'}
+ 
+In [12]: print type(json.loads(b))
+<type 'dict'>
+
+　
+
+然后再看dump和dumps的区别，见代码：
+
+In [1]: import json
+ 
+In [2]: a = {'name': 'wang', 'age': 29}
+ 
+In [3]: b = json.dumps(a)
+ 
+In [4]: print b, type(b)
+{"age": 29, "name": "wang"} <type 'str'>
+ 
+In [5]: c = json.dump(a)
+---------------------------------------------------------------------------
+TypeError                                 Traceback (most recent call last)
+<ipython-input-5-92dc0d929363> in <module>()
+----> 1 c = json.dump(a)
+ 
+TypeError: dump() takes at least 2 arguments (1 given)
+
+ 
+
+这里提示我们少一个参数，我们看一下帮助文件（iPyhton中可以直接使用help(json.dumps)来查看帮助文件）：
+
+ 
+
+dumps(obj, skipkeys=False, ensure_ascii=True, check_circular=True, allow_nan=True, cls=None, indent=None, separators=None, encoding='utf-8', default=None, sort_keys=False, **kw)
+Serialize ``obj`` to a JSON formatted ``str``.
+
+ 
+
+dump(obj, fp, skipkeys=False, ensure_ascii=True, check_circular=True, allow_nan=True, cls=None, indent=None, separators=None, encoding='utf-8', default=None, sort_keys=False, **kw)
+Serialize ``obj`` as a JSON formatted stream to ``fp`` (a
+``.write()``-supporting file-like object).
+
+ 
+
+简单说就是dump需要一个类似于文件指针的参数（并不是真的指针，可称之为类文件对象），可以与文件操作结合，也就是说可以将dict转成str然后存入文件中；而dumps直接给的是str，也就是将字典转成str。
+
+例子见代码（注意文件操作的一些小细节）：
+
+In [1]: import json
+ 
+In [2]: a = {'name': 'wang'}
+ 
+In [3]: fp = file('test.txt', 'w')
+ 
+In [4]: type(fp)
+Out[4]: file
+ 
+In [5]: json.dump(a, fp)
+ 
+In [6]: cat test.txt
+ 
+In [7]: fp.close()
+ 
+In [8]: cat test.txt
+{"name": "wang"}
+In [9]: json.load(fp)
+---------------------------------------------------------------------------
+ValueError                                Traceback (most recent call last)
+<ipython-input-9-0064dabedb17> in <module>()
+----> 1 json.load(fp)
+ 
+/usr/local/Cellar/python/2.7.11/Frameworks/Python.framework/Versions/2.7/lib/python2.7/json/__init__.pyc in load(fp, encoding, cls, object_hook, parse_float, parse_int, parse_constant, object_pairs_hook, **kw)
+    285
+    286     """
+--> 287     return loads(fp.read(),
+    288         encoding=encoding, cls=cls, object_hook=object_hook,
+    289         parse_float=parse_float, parse_int=parse_int,
+ 
+ValueError: I/O operation on closed file
+ 
+In [10]: fp = file('test.txt', 'r')
+ 
+In [11]: json.load(fp)
+Out[11]: {u'name': u'wang'}
+
+　　
+
+注：实际中dump用的较少。 
