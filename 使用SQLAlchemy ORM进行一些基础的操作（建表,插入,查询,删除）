@@ -154,3 +154,53 @@ session.delete(session.query(hehe).filter(hehe.a=='1').one())
 最后，别忘了把session关闭
 
 session.close()
+
+
+链接：http://blog.csdn.net/u014595019/article/details/49913437
+
+####################################################################################################
+python之sqlalchemy创建表的实例详解
+
+通过sqlalchemy创建表需要三要素：引擎，基类，元素
+
+from sqlalchemy import create_engine 
+from sqlalchemy.ext.declarative import declarative_base 
+from sqlalchemy import Column,Integer,String
+
+引擎：也就是实体数据库连接
+
+	
+engine = create_engine('mysql+pymysql://godme:godme@localhost/godme',encoding='utf-8',echo=True)
+
+传入参数：数据库类型+连接库+用户名+密码+主机，字符编码，是否打印建表细节
+
+基类：
+
+	
+Base = declarative_base()
+
+元素：
+
+class User(Base): 
+  __tablename__ = 'user'
+  id = Column(Integer,primary_key=True) 
+  name = Column(String(32)) 
+  password = Column(String(64)) 
+
+通过基本元素：
+
+__tablename__：指定表名
+Column：行声明，可指定主键
+Integer：数据类型
+String：数据类型，可指定长度
+
+创建：
+
+Base.metadata.create_all(engine)
+
+基本过程：
+
+1. 获取实体数据库连接
+2. 创建类，继承基类，用基本类型描述数据库结构
+3. 基类调用类结构，根据描述在引擎上创建数据表
+链接：http://blog.csdn.net/wait_for_eva/article/details/78166156
