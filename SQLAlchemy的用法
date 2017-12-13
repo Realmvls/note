@@ -1,4 +1,11 @@
 Python操作MySQL -即pymysql/SQLAlchemy用法
+
+这几篇博客可以对照看：
+http://www.ttlsa.com/python/sqlalchemy-concise-guide/
+http://www.codeweblog.com/%E5%B8%B8%E8%A7%81%E7%9A%84sqlalchemy%E5%88%97%E7%B1%BB%E5%9E%8B-%E9%85%8D%E7%BD%AE%E9%80%89%E9%A1%B9%E5%92%8C%E5%85%B3%E7%B3%BB%E9%80%89%E9%A1%B9/
+
+
+
 本节介绍Python对于MySQL的一些操作用法
 
 模块1：pymysql（等同于MySQLdb）
