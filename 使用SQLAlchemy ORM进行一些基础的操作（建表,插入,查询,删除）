@@ -204,3 +204,46 @@ Base.metadata.create_all(engine)
 2. 创建类，继承基类，用基本类型描述数据库结构
 3. 基类调用类结构，根据描述在引擎上创建数据表
 链接：http://blog.csdn.net/wait_for_eva/article/details/78166156
+
+
+
+下面是自己写的ORM的小demo
+实现创建表的操作：
+from sqlalchemy import Column,create_engine,String,Text, Integer, TIMESTAMP
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.declarative import declarative_base
+
+Base = declarative_base()
+
+
+class Tcompany(Base):
+    __tablename__ = "tcompany"
+    id = Column(Integer,primary_key=True)  # ID
+    companyCode = Column(String(30))  # 公司编号
+    companyLogo = Column(String(2000))  # 公司Logo
+    shortName = Column(String(1000))  # 公司简称
+    infoRefinanceStatus = Column(String(200))  # 融资状态
+    fullName = Column(String(1000))  # 公司全称
+    summary = Column(String(500))  # 公司一句还简介
+    infoCompanySize = Column(String(200))  # 公司规模
+    companyUrl = Column(String(2000))  # 公司网址
+    weibo = Column(String(2000))  # 公司微博
+    wechat = Column(String(2000))  # 公司微信
+    infoCity = Column(String(1000))  # 公司所在城市
+    companyLabel = Column(String(2000))  # 公司Tag
+    establishDate = Column(String(200))  # 公司成立时间
+    infoIndustry = Column(String(2000))  # 公司行业
+    companyStatus = Column(String(2000))  # 公司状态
+    descDescribe = Column(Text)  # 公司介绍
+    picture = Column(String(3000))  # 介绍图片
+    url = Column(Text)  # 数据的url
+    sourecurl = Column(Text)  # url 来源的网站
+    inserttime = Column(TIMESTAMP)  # 插入时间
+    updatetime = Column(TIMESTAMP)  # 更新时间
+
+engine = create_engine('mysql+mysqlconnector://tech:dC0-s2K-7Cg-Boz@101.132.160.238:3306/dataclean')
+DBSession = sessionmaker(bind=engine)
+session = DBSession()
+Base.metadata.create_all(engine)
+
+session.close()
