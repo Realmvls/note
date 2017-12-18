@@ -1,0 +1,4 @@
+content = requests.get(url, headers=Headers).content
+此句中的url如若是正则匹配来的，则其两边不能有空格，否则会请求不到指定的内容
+例如  ‘url’ 正确
+      ‘url ’ 错误
