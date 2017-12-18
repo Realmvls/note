@@ -10,7 +10,7 @@ fetchall，直接用for循环遍历，有空研究下SSCursor。。。
 from sqlalchemy import create_engine
 import pymysql
 
-
+                    *此处必须用pymysql，不能用mysqlconnector
 mysql_uri = 'mysql+pymysql://tech:xxxxxxxxxxx@101.125.563.238:3306/itjuzi?charset=utf8'
 engine = create_engine(mysql_uri, connect_args={'cursorclass': pymysql.cursors.SSCursor})
 # DB_Session = sessionmaker(bind=engine)
