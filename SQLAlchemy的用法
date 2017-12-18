@@ -1,5 +1,27 @@
 Python操作MySQL -即pymysql/SQLAlchemy用法
 
+踩坑记录：
+
+用sqlalchemy读取mydql数据库中的内容，如果表中的某个字段内容过多用fetchall 取数据的话，不会报错，
+显示程序一直在运行但无返回值，原因貌似是因为fetchall会把所有内容读到内存，解决方法：用SSCursor游标且不要用
+fetchall，直接用for循环遍历，有空研究下SSCursor。。。
+
+
+from sqlalchemy import create_engine
+import pymysql
+
+
+mysql_uri = 'mysql+pymysql://tech:xxxxxxxxxxx@101.125.563.238:3306/itjuzi?charset=utf8'
+engine = create_engine(mysql_uri, connect_args={'cursorclass': pymysql.cursors.SSCursor})
+# DB_Session = sessionmaker(bind=engine)
+# session = DB_Session()
+# sql = 'select url,html from xjf_company where id=3'
+sql = 'select url,html from company'
+cur = engine.execute(sql)
+for a in cur:
+    print(a)
+
+
 这几篇博客可以对照看：
 http://www.ttlsa.com/python/sqlalchemy-concise-guide/
 http://www.codeweblog.com/%E5%B8%B8%E8%A7%81%E7%9A%84sqlalchemy%E5%88%97%E7%B1%BB%E5%9E%8B-%E9%85%8D%E7%BD%AE%E9%80%89%E9%A1%B9%E5%92%8C%E5%85%B3%E7%B3%BB%E9%80%89%E9%A1%B9/
