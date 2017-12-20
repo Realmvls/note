@@ -1,4 +1,8 @@
  链接http://www.codexiu.cn/python/sqlalchemy%E5%9F%BA%E7%A1%80%E6%95%99%E7%A8%8B/531/
+ 
+ https://www.cnblogs.com/coder2012/p/4741081.html
+ 
+ 
  SQLAlchemy会话与事务控制
        本篇内容为大家提供的是SQLAlchemy基础教程中的SQLAlchemy会话与事务控制，该教程主要介绍了SQLAlchemy会话与事务控制的基本使用、for update、事务嵌套、二段式提交等，详细而全面，感兴趣的同学可以参考学习一下。
 
