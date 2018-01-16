@@ -1,0 +1,12 @@
+import pandas as pd
+a = dict()
+a['A'] = 1
+a['B'] = 2
+a['C'] = 3
+a['D'] = 5
+a['E'] = 5
+a['F'] = 6
+
+df = pd.DataFrame(a,index=range(1))
+df.to_csv('G:/11111.csv',index=False,header=False,mode='a')     # mode='a' 续写，非覆盖写入
+print('导出完成')
