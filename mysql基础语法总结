@@ -1,7 +1,7 @@
 mysql 基础总结         mysql语句最后都要加分号啊啊啊
-开启mysql服务：     net start mysql
-关闭mysql服务：     net stop mysql
-登录mysql：         mysql -uroot -p         #如果设置了密码则在-p后面不空格直接跟密码
+开启mysql服务：     net start mysql57             #57是当初指定的版本号  ！！要以管理员的身份运行powershell
+关闭mysql服务：     net stop mysql57
+登录mysql：         mysql -uroot -p         #如果设置了密码则在-p后面不空格直接跟密码  密码：123456
 登录时直接定位到test数据库： mysql -uroot -p123 test
 退出数据库：        quit或者exit            #先退出数据库，再关闭mysql服务
 查看都有哪些数据库： show databases；        #mysql中的语句必须加分号结尾
